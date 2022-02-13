@@ -33,4 +33,4 @@
 
 # directories
 .vs
-project/x64
+build

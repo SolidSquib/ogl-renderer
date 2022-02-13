@@ -276,7 +276,7 @@ int main()
 		
 		int uniformLocation = glGetUniformLocation(uniformTestShader, "inColor");
 		glUseProgram(uniformTestShader);
-		float time = glfwGetTime();
+		float time = (float)glfwGetTime();
 		float red = sin(time) / 2.0f + 0.5f;
 		float green = cos(time) / 2.0f + 0.5f;
 		float blue = 0.0f;
