@@ -2,7 +2,10 @@
 
 layout(location = 0) in vec3 aPos;
 
+uniform vec3 offset;
+
 void main()
 {
-	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+	vec3 finalPos = aPos+offset;
+	gl_Position = vec4(finalPos, 1.0);
 }

@@ -34,9 +34,6 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 
 	// Create and compile shaders, link to shader program
 	unsigned int vertex, fragment;
-	char infoText[512];
-	int success;
-
 	vertex = glCreateShader(GL_VERTEX_SHADER);	
 	glShaderSource(vertex, 1, &cVertexCode, NULL);
 	glCompileShader(vertex);
@@ -117,7 +114,27 @@ void Shader::SetFloat(const std::string& name, float value)
 	glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 
+void Shader::SetVector2(const std::string& name, float x, float y, float z)
+{
+	glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
+}
+
+void Shader::SetVector3(const std::string& name, float x, float y, float z)
+{
+	glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
+}
+
+void Shader::SetVector4(const std::string& name, float x, float y, float z, float w)
+{
+	glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
+}
+
 void Shader::SetColor(const std::string& name, float red, float green, float blue, float alpha)
 {
-	glUniform4f(glGetUniformLocation(ID, name.c_str()), red, green, blue, alpha);
+	SetVector4(name, red, green, blue, alpha);
+}
+
+void Shader::Unbind()
+{
+	glUseProgram(0);
 }
