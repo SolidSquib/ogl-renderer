@@ -9,11 +9,11 @@ static const float triangle_verts[] = {
 	0.0f, -0.5f, 0.0f	
 };
 
-static const float triangle_verts2[] = {
+static const float triangle2_data[] = {
 	// triangle 2
-	0.5f, 0.5f, 0.0f,
-	1.0f, -0.5f, 0.0f,
-	0.0f, -0.5f, 0.0f
+	/*position*/ 0.5f, 0.5f, 0.0f,  /*color*/ 1.0f, 0.0f, 0.0f,
+	/*position*/ 1.0f, -0.5f, 0.0f, /*color*/ 0.0f, 1.0f, 0.0f,
+	/*position*/ 0.0f, -0.5f, 0.0f, /*color*/ 0.0f, 0.0f, 1.0f
 };
 
 static const float quad_verts[] = {
@@ -35,11 +35,37 @@ const char* vertexShaderSource = "#version 330 core\n"
 	"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
 	"}";
 
+const char* vertShaderInputColor = "#version 330 core\n"
+	"layout(location = 0) in vec3 aPos;\n"
+	"layout(location = 1) in vec3 aCol;\n"
+	"out vec4 vertColor;"
+	"void main()\n"
+	"{\n"
+	"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+	"	vertColor = vec4(aCol, 1.0);\n"
+	"}";
+
+const char* fragShaderInputColor = "#version 330 core\n"
+	"in vec4 vertColor;"
+	"out vec4 fragColor;\n"
+	"void main()\n"
+	"{\n"
+	"	fragColor = vertColor;\n"
+	"}";
+
 const char* fragmentShaderSource = "#version 330 core\n"
 	"out vec4 fragColor;\n"
 	"void main()\n"
 	"{\n"
 	"	fragColor = vec4(%f, %f, %f, %f);\n"
+	"}";
+
+const char* fragmentUniformColorSource = "#version 330 core\n"
+	"uniform vec4 inColor;\n"
+	"out vec4 fragColor;\n"
+	"void main()\n"
+	"{\n"
+	"	fragColor = inColor;\n"
 	"}";
 
 void framebuffer_size_changed_callback(GLFWwindow* window, int width, int height)
@@ -82,12 +108,12 @@ bool CheckShaderProgramLinkedCorrectly(unsigned int program)
 	return success;
 }
 
-unsigned int CreateBasicVertexShader()
+unsigned int CreateBasicShader(GLenum type, const char* source)
 {
 	unsigned int shader;
 
-	shader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(shader, 1, &vertexShaderSource, NULL);
+	shader = glCreateShader(type);
+	glShaderSource(shader, 1, &source, NULL);
 	glCompileShader(shader);
 
 	return CheckShaderCompiledCorrectly(shader) ? shader : -1;
@@ -109,8 +135,23 @@ unsigned int CreateBasicColorFragmentShader(float red, float green, float blue, 
 unsigned int CreateBasicColorShaderProgram(float red, float green, float blue, float alpha)
 {
 	unsigned int program;
-	unsigned int vertexShader = CreateBasicVertexShader();
+	unsigned int vertexShader = CreateBasicShader(GL_VERTEX_SHADER, vertexShaderSource);
 	unsigned int fragmentShader = CreateBasicColorFragmentShader(red, green, blue, alpha);
+
+	// Create a shader program from our shaders we created above
+	program = glCreateProgram();
+	glAttachShader(program, vertexShader);
+	glAttachShader(program, fragmentShader);
+	glLinkProgram(program);
+
+	return CheckShaderProgramLinkedCorrectly(program) ? program : -1;
+}
+
+unsigned int CreateShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource)
+{
+	unsigned int program;
+	unsigned int vertexShader = CreateBasicShader(GL_VERTEX_SHADER, vertexShaderSource);
+	unsigned int fragmentShader = CreateBasicShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 
 	// Create a shader program from our shaders we created above
 	program = glCreateProgram();
@@ -169,6 +210,8 @@ int main()
 
 	unsigned int orange = CreateBasicColorShaderProgram(1.0f, 0.5f, 0.2f, 1.0f);
 	unsigned int teal = CreateBasicColorShaderProgram(0.0f, 0.5f, 0.5f, 1.0f);
+	unsigned int uniformTestShader = CreateShaderProgram(vertexShaderSource, fragmentUniformColorSource);
+	unsigned int vertColorTestShader = CreateShaderProgram(vertShaderInputColor, fragShaderInputColor);
 	
 	unsigned int triangleBuffers[2];
 	unsigned int triangleArrayBuffers[2];
@@ -198,10 +241,13 @@ int main()
 	glBindVertexArray(triangleArrayBuffers[1]);
 
 	glBindBuffer(GL_ARRAY_BUFFER, triangleBuffers[1]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_verts2), triangle_verts2, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle2_data), triangle2_data, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
 	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	// Setup the quad
 	glBindVertexArray(quadVertexBufferArray);
@@ -225,14 +271,20 @@ int main()
 		processInput(window);
 
 		// render 
-		glClearColor(0.1f, 0.5f, 0.2f, 1.0f);
+		glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		glUseProgram(orange);
+		int uniformLocation = glGetUniformLocation(uniformTestShader, "inColor");
+		glUseProgram(uniformTestShader);
+		float time = glfwGetTime();
+		float red = sin(time) / 2.0f + 0.5f;
+		float green = cos(time) / 2.0f + 0.5f;
+		float blue = 0.0f;
+		glUniform4f(uniformLocation, red, green, blue, 1.0f);		
 		glBindVertexArray(triangleArrayBuffers[0]);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
-		glUseProgram(teal);
+		glUseProgram(vertColorTestShader);
 		glBindVertexArray(triangleArrayBuffers[1]);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
