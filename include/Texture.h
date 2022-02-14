@@ -10,9 +10,12 @@ private:
 	unsigned int ID = 0;
 
 public:
-	Texture(const char* texturePath);
+	Texture(const char* texturePath, bool flipVertically);
+	Texture(const char* texturePath, bool flipVertically, unsigned int glTextureType);
 
-	void Use();
+	void Use(unsigned int index = 0);
+	void SetTextureWrappingMode(unsigned int paramu, unsigned int paramv);
+	void SetTextureSamplingMode(unsigned int paramMin, unsigned int paramMag);
 
 	unsigned int GetID() const { return ID; }
 };

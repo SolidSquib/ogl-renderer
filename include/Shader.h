@@ -26,10 +26,19 @@ public:
 	void SetBool(const std::string& name, bool value);
 	void SetInt(const std::string& name, int value);
 	void SetFloat(const std::string& name, float value);
-	void SetVector2(const std::string& name, float x, float y, float z);
+	void SetVector2(const std::string& name, float x, float y);
 	void SetVector3(const std::string& name, float x, float y, float z);
 	void SetVector4(const std::string& name, float x, float y, float z, float w);
 	void SetColor(const std::string& name, float red, float green, float blue, float alpha);
+
+	// getters for uniform values
+	bool GetBool(const std::string& name) const;
+	int GetInt(const std::string& name) const;
+	float GetFloat(const std::string& name) const;
+	void GetVector2(const std::string& name, float& outX, float& outY) const;
+	void GetVector3(const std::string& name, float& outX, float& outY, float& outZ) const;
+	void GetVector4(const std::string& name, float& outX, float& outY, float& outZ, float& outW) const;
+	void GetColor(const std::string& name, float& outR, float& outG, float& outB, float& outA) const;
 
 	bool IsValid() const { return ID != 0; }
 

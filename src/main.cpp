@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <algorithm>
 
 #include "Shader.h"
 #include "Texture.h"
@@ -36,7 +37,7 @@ void ProcessInput(GLFWwindow* window)
 	else if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
+	}	
 }
 
 int main()
@@ -69,17 +70,25 @@ int main()
 	glViewport(0, 0, 800, 600);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_changed_callback);
 
-	Texture containerTexture("content/textures/container.jpg");
+	Texture containerTexture("content/textures/container.jpg", false);
+	containerTexture.SetTextureSamplingMode(GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
+	Texture smilingFace("content/textures/awesomeface.png", true, GL_RGBA);
+	smilingFace.SetTextureSamplingMode(GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
 
 	Shader uniformColorTransitionShader("shaders/simple-position.vert", "shaders/uniform-color.frag");
+
 	Shader inputColorShader("shaders/simple-position-color.vert", "shaders/simple-color.frag");
+
 	Shader textureShader("shaders/simple-texture.vert", "shaders/simple-texture.frag");
 	textureShader.Use();
-	textureShader.SetInt("diffuseTexture", 0);
+	textureShader.SetInt("texture0", 0);
+	textureShader.SetInt("texture1", 1);
+	textureShader.SetFloat("blend_alpha", 0.2f);
 
 	Shader orangeShader("shaders/simple-position.vert", "shaders/uniform-color.frag");	
 	orangeShader.Use();
 	orangeShader.SetColor("uniformColor", 1.0f, 0.5f, 0.2f, 1.0f);
+
 	Shader::Unbind();
 	
 	unsigned int meshVAO;
@@ -120,7 +129,8 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		textureShader.Use();
-		containerTexture.Use();
+		containerTexture.Use(0);
+		smilingFace.Use(1);
 		glBindVertexArray(meshVAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
