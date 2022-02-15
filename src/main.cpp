@@ -6,35 +6,36 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Camera.h"
+#include "Mesh.h"
 
 void framebuffer_size_changed_callback(GLFWwindow* window, int width, int height);
 void mouseCallback(GLFWwindow* window, double xPos, double yPos);
 void scrollCallback(GLFWwindow* window, double xOffset, double yOffset);
 void ProcessInput(GLFWwindow* window);
 
-const float meshData[] = {
-	0.5f, 0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,
-	0.5f, -0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f,
-	-0.5f, -0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f,
-	-0.5f, 0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,
+const std::vector<Vertex> cube_vertices = {
+	{ {0.5f, 0.5f, 0.5f}, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } },
+	{ {0.5f, -0.5f, 0.5f}, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },
+	{ {-0.5f, -0.5f, 0.5f}, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
+	{ {-0.5f, 0.5f, 0.5f}, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } },
 
-	0.5f, 0.5f, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,
-	0.5f, -0.5f, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,	1.0f, 1.0f, 1.0f,		1.0f, 0.0f,
-	-0.5f, 0.5f, -0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,
+	{ {0.5f, 0.5f, -0.5f}, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } },
+	{ {0.5f, -0.5f, -0.5f}, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
+	{ {-0.5f, -0.5f, -0.5f}, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },
+	{ {-0.5f, 0.5f, -0.5f}, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } },
 
-	0.5f, 0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,
-	-0.5f, 0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f,
-	-0.5f, 0.5f, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f,
-	0.5f, 0.5f, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,
+	{ {0.5f, 0.5f, 0.5f}, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } },
+	{ {-0.5f, 0.5f, 0.5f}, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },
+	{ {-0.5f, 0.5f, -0.5f}, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
+	{ {0.5f, 0.5f, -0.5f}, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } },
 
-	0.5f, -0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,
-	-0.5f, -0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f,	1.0f, 1.0f, 1.0f,		0.0f, 0.0f,
-	0.5f, -0.5f, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,
+	{ {0.5f, -0.5f, 0.5f}, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } },
+	{ {-0.5f, -0.5f, 0.5f}, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },
+	{ {-0.5f, -0.5f, -0.5f}, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
+	{ {0.5f, -0.5f, -0.5f}, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } }
 };
 
-const int meshIndices[] = {
+const std::vector<unsigned int> cube_indices = {
 	0, 1, 3,	// front face
 	1, 2, 3,
 
@@ -111,60 +112,28 @@ int main()
 	glfwSetCursorPosCallback(window, mouseCallback);
 	glfwSetScrollCallback(window, scrollCallback);
 
+	// Set up the models
 	Texture containerTexture("content/textures/container.jpg", false);
 	containerTexture.SetTextureSamplingMode(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
+
 	Texture smilingFace("content/textures/awesomeface.png", true, GL_RGBA);
 	smilingFace.SetTextureSamplingMode(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
-
-	Shader uniformColorTransitionShader("shaders/simple-position.vert", "shaders/uniform-color.frag");
-
-	Shader inputColorShader("shaders/simple-position-color.vert", "shaders/simple-color.frag");
 		
 	Shader textureShader("shaders/simple-texture.vert", "shaders/simple-texture.frag");
 	textureShader.Use();
 	textureShader.SetInt("texture0", 0);
 	textureShader.SetInt("texture1", 1);
-	textureShader.SetFloat("blend_alpha", 0.2f);	
+	textureShader.SetFloat("blend_alpha", 0.2f);
 
-	Shader orangeShader("shaders/simple-position.vert", "shaders/uniform-color.frag");	
-	orangeShader.Use();
-	orangeShader.SetColor("uniformColor", 1.0f, 0.5f, 0.2f, 1.0f);
-
-	Shader::Unbind();
-	
-	unsigned int meshVAO;
-	unsigned int meshBufferObjects[2];
-	glGenVertexArrays(1, &meshVAO);
-	glBindVertexArray(meshVAO);
-
-	glGenBuffers(2, meshBufferObjects);
-	glBindBuffer(GL_ARRAY_BUFFER, meshBufferObjects[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(meshData), meshData, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshBufferObjects[1]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(meshIndices), meshIndices, GL_STATIC_DRAW);
-
-	// bind the vertex position 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, NULL);
-	glEnableVertexAttribArray(0);
-
-	// bind the vertex color
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	// bind the vertex uv coordinates
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
-	// Unbind the VAO, just to be safe;
-	glBindVertexArray(0);
+	Material mat(textureShader, { {0, containerTexture}, {1, smilingFace} });
+	Mesh cube(cube_vertices, cube_indices, mat);
 
 	glEnable(GL_DEPTH_TEST);
 
 	// start the main loop
 	while (!glfwWindowShouldClose(window))
 	{
-		float time = glfwGetTime();
+		float time = (float)glfwGetTime();
 		deltaTime = time - lastFrameTime;
 		lastFrameTime = time;
 
@@ -175,12 +144,10 @@ int main()
 		glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		textureShader.Use();
-		containerTexture.Use(0);
-		smilingFace.Use(1);		
 		textureShader.SetMatrix4("view", mainCamera.GetViewMatrix());
 		textureShader.SetMatrix4("projection", projection);
-		glBindVertexArray(meshVAO);
+		
+		cube.PreRender();
 
 		for (unsigned int i = 0; i < (sizeof(cubePositions) / sizeof(cubePositions[0])); ++i)
 		{
@@ -193,8 +160,9 @@ int main()
 			float angle = glm::radians(20.0f * (float)i);
 			modelTransform = glm::rotate(modelTransform, angle + ((float)glfwGetTime() * glm::radians(50.0f)), rotationAxis);
 			textureShader.SetMatrix4("model", modelTransform);
-			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, NULL);
-		}		
+
+			cube.Render();
+		}
 
 		// glfw events and swap buffers
 		glfwSwapBuffers(window);
@@ -218,15 +186,15 @@ void mouseCallback(GLFWwindow* window, double xPos, double yPos)
 {
 	if (firstMouse)
 	{
-		mouseX = xPos;
-		mouseY = yPos;
+		mouseX = (float)xPos;
+		mouseY = (float)yPos;
 		firstMouse = false;
 	}
 
-	float deltaX = xPos - mouseX;
-	float deltaY = mouseY - yPos;
-	mouseX = xPos;
-	mouseY = yPos;
+	float deltaX = (float)xPos - mouseX;
+	float deltaY = mouseY - (float)yPos;
+	mouseX = (float)xPos;
+	mouseY = (float)yPos;
 
 	mainCamera.ProcessLookInput(deltaX, deltaY);
 }
