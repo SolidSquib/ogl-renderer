@@ -3,10 +3,6 @@
 #include <iostream>
 #include <algorithm>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "Shader.h"
 #include "Texture.h"
 
@@ -75,19 +71,19 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_changed_callback);
 
 	Texture containerTexture("content/textures/container.jpg", false);
-	containerTexture.SetTextureSamplingMode(GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
+	containerTexture.SetTextureSamplingMode(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
 	Texture smilingFace("content/textures/awesomeface.png", true, GL_RGBA);
-	smilingFace.SetTextureSamplingMode(GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
+	smilingFace.SetTextureSamplingMode(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
 
 	Shader uniformColorTransitionShader("shaders/simple-position.vert", "shaders/uniform-color.frag");
 
 	Shader inputColorShader("shaders/simple-position-color.vert", "shaders/simple-color.frag");
-
+		
 	Shader textureShader("shaders/simple-texture.vert", "shaders/simple-texture.frag");
 	textureShader.Use();
 	textureShader.SetInt("texture0", 0);
 	textureShader.SetInt("texture1", 1);
-	textureShader.SetFloat("blend_alpha", 0.2f);
+	textureShader.SetFloat("blend_alpha", 0.2f);	
 
 	Shader orangeShader("shaders/simple-position.vert", "shaders/uniform-color.frag");	
 	orangeShader.Use();
@@ -128,6 +124,12 @@ int main()
 		// handle input
 		ProcessInput(window);
 
+		// matrix multiplication is not commutative: A*B != B*A. The order we apply these transforms has an impact 
+		// on the end result. Keep an eye out for it.
+		glm::mat4 transform(1.0f);
+		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+		transform = glm::rotate(transform, (float)glm::radians(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+
 		// render 
 		glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -135,7 +137,16 @@ int main()
 		textureShader.Use();
 		containerTexture.Use(0);
 		smilingFace.Use(1);
+		textureShader.SetMatrix4("transform", transform);
 		glBindVertexArray(meshVAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+
+		float uniformScale = sin(glfwGetTime()) * 0.5f + 0.5f;
+		transform = glm::mat4(1.0f);
+		transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
+		transform = glm::scale(transform, glm::vec3(uniformScale, uniformScale, 1.0f));
+		transform = glm::rotate(transform, (float)glm::radians(glfwGetTime() * 0.5f), glm::vec3(0.0f, 0.0f, -1.0f));
+		textureShader.SetMatrix4("transform", transform);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
 		// glfw events and swap buffers

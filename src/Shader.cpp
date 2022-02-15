@@ -134,6 +134,11 @@ void Shader::SetColor(const std::string& name, float red, float green, float blu
 	SetVector4(name, red, green, blue, alpha);
 }
 
+void Shader::SetMatrix4(const std::string& name, glm::mat4 matrix)
+{
+	glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
 bool Shader::GetBool(const std::string& name) const
 {
 	int outValue;

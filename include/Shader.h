@@ -7,6 +7,10 @@
 #include <sstream>
 #include <iostream>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 class Shader 
 {
 private:
@@ -30,6 +34,7 @@ public:
 	void SetVector3(const std::string& name, float x, float y, float z);
 	void SetVector4(const std::string& name, float x, float y, float z, float w);
 	void SetColor(const std::string& name, float red, float green, float blue, float alpha);
+	void SetMatrix4(const std::string& name, glm::mat4 matrix);
 
 	// getters for uniform values
 	bool GetBool(const std::string& name) const;
