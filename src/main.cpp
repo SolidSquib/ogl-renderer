@@ -65,13 +65,15 @@ bool useOrthographicProjection = false;
 glm::mat4 projection(1.0);
 glm::vec3 cameraPosition(0.0f, 0.0f, 3.0f);
 float cameraPanSpeed = 0.1f;
+float fovDegrees = 45.0f;
+float fovScrollSpeed = 0.1f;
 
 void framebuffer_size_changed_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 	projection = useOrthographicProjection
 		? glm::ortho(0.0f, (float)width, 0.0f, (float)height, 0.1f, 100.0f)
-		: glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
+		: glm::perspective(glm::radians(fovDegrees), (float)width / (float)height, 0.1f, 100.0f);
 }
 
 void ProcessInput(GLFWwindow* window)
@@ -138,6 +140,22 @@ void ProcessInput(GLFWwindow* window)
 	else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 	{
 		cameraPosition.g += 1.0f * cameraPanSpeed;
+	}
+
+	// FoV
+	if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
+	{
+		fovDegrees -= fovScrollSpeed;
+		int width, height;
+		glfwGetWindowSize(window, &width, &height);
+		framebuffer_size_changed_callback(window, width, height);
+	}
+	else if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
+	{
+		fovDegrees += fovScrollSpeed;
+		int width, height;
+		glfwGetWindowSize(window, &width, &height);
+		framebuffer_size_changed_callback(window, width, height);
 	}
 }
 
