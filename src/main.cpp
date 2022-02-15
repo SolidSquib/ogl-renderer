@@ -6,6 +6,11 @@
 #include "Shader.h"
 #include "Texture.h"
 
+void framebuffer_size_changed_callback(GLFWwindow* window, int width, int height);
+void mouseCallback(GLFWwindow* window, double xPos, double yPos);
+void scrollCallback(GLFWwindow* window, double xOffset, double yOffset);
+void ProcessInput(GLFWwindow* window);
+
 const float meshData[] = {
 	0.5f, 0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,
 	0.5f, -0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f,
@@ -64,100 +69,17 @@ const glm::vec3 cubePositions[] = {
 bool useOrthographicProjection = false;
 glm::mat4 projection(1.0);
 glm::vec3 cameraPosition(0.0f, 0.0f, 3.0f);
-float cameraPanSpeed = 0.1f;
+glm::vec3 cameraDirection(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
+float cameraPanSpeed = 2.0f;
 float fovDegrees = 45.0f;
-float fovScrollSpeed = 0.1f;
-
-void framebuffer_size_changed_callback(GLFWwindow* window, int width, int height)
-{
-	glViewport(0, 0, width, height);
-	projection = useOrthographicProjection
-		? glm::ortho(0.0f, (float)width, 0.0f, (float)height, 0.1f, 100.0f)
-		: glm::perspective(glm::radians(fovDegrees), (float)width / (float)height, 0.1f, 100.0f);
-}
-
-void ProcessInput(GLFWwindow* window)
-{
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-	{
-		glfwSetWindowShouldClose(window, true);
-	}
-	else if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
-	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	}
-	else if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
-	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
-
-	// set orthographic projection
-	else if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
-	{
-		if (!useOrthographicProjection)
-		{
-			useOrthographicProjection = true;
-			int width, height;
-			glfwGetWindowSize(window, &width, &height);
-			framebuffer_size_changed_callback(window, width, height);
-		}
-	}
-	// set perspective projection
-	else if (glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS)
-	{
-		if (useOrthographicProjection)
-		{
-			useOrthographicProjection = false;
-			int width, height;
-			glfwGetWindowSize(window, &width, &height);
-			framebuffer_size_changed_callback(window, width, height);
-		}
-	}
-
-	// pan camera position
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	{
-		cameraPosition.b -= 1.0f * cameraPanSpeed;
-	}
-	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-		cameraPosition.b += 1.0f * cameraPanSpeed;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		cameraPosition.r -= 1.0f * cameraPanSpeed;
-	}	
-	else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		cameraPosition.r += 1.0f * cameraPanSpeed;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-	{
-		cameraPosition.g -= 1.0f * cameraPanSpeed;
-	}
-	else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-	{
-		cameraPosition.g += 1.0f * cameraPanSpeed;
-	}
-
-	// FoV
-	if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
-	{
-		fovDegrees -= fovScrollSpeed;
-		int width, height;
-		glfwGetWindowSize(window, &width, &height);
-		framebuffer_size_changed_callback(window, width, height);
-	}
-	else if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
-	{
-		fovDegrees += fovScrollSpeed;
-		int width, height;
-		glfwGetWindowSize(window, &width, &height);
-		framebuffer_size_changed_callback(window, width, height);
-	}
-}
+float fovScrollSpeed = 5.0f;
+float deltaTime = 0.0f;
+float lastFrameTime = 0.0f;
+float mouseX = 0.0f, mouseY = 0.0f;
+float cameraPitch = 0.0f, cameraYaw = -90.0f;
+bool firstMouse = true;
+float mouseSensitivity = 0.1f;
 
 int main()
 {
@@ -165,7 +87,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
+	
 #ifdef CE_PLATFORM_OSX
 	// Required for OSX
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -188,6 +110,10 @@ int main()
 		
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_changed_callback);
 	framebuffer_size_changed_callback(window, 800, 600);
+
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(window, mouseCallback);
+	glfwSetScrollCallback(window, scrollCallback);
 
 	Texture containerTexture("content/textures/container.jpg", false);
 	containerTexture.SetTextureSamplingMode(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
@@ -242,6 +168,10 @@ int main()
 	// start the main loop
 	while (!glfwWindowShouldClose(window))
 	{
+		float time = glfwGetTime();
+		deltaTime = time - lastFrameTime;
+		lastFrameTime = time;
+
 		// handle input
 		ProcessInput(window);
 
@@ -249,9 +179,7 @@ int main()
 		* in order to make it appear like the camera is moving around a scene, we can apply
 		* the opposite of the camera's transform to all objects in a scene. Simply moving the camera would achieve
 		* nothing, since we're not actually interested in rendering the camera itself. */
-		glm::mat4 viewTransform(1.0f);
-		viewTransform = glm::translate(viewTransform, -cameraPosition);
-
+		glm::mat4 viewTransform = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
 
 		// render 
 		glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
@@ -286,4 +214,142 @@ int main()
 	// release resources
 	glfwTerminate();
 	return 0;
+}
+
+void framebuffer_size_changed_callback(GLFWwindow* window, int width, int height)
+{
+	glViewport(0, 0, width, height);
+	projection = useOrthographicProjection
+		? glm::ortho(0.0f, (float)width, 0.0f, (float)height, 0.1f, 100.0f)
+		: glm::perspective(glm::radians(fovDegrees), (float)width / (float)height, 0.1f, 100.0f);
+}
+
+void mouseCallback(GLFWwindow* window, double xPos, double yPos)
+{
+	if (firstMouse)
+	{
+		mouseX = xPos;
+		mouseY = yPos;
+		firstMouse = false;
+	}
+
+	float deltaX = xPos - mouseX;
+	float deltaY = mouseY - yPos;
+	mouseX = xPos;
+	mouseY = yPos;
+
+	cameraPitch += deltaY * mouseSensitivity;
+	cameraYaw += deltaX * mouseSensitivity;
+
+	glm::vec3 direction;
+	direction.x = glm::cos(glm::radians(cameraYaw)) * glm::cos(glm::radians(cameraPitch));
+	direction.y = glm::sin(glm::radians(cameraPitch));
+	direction.z = glm::sin(glm::radians(cameraYaw)) * glm::cos(glm::radians(cameraPitch));
+	cameraDirection = glm::normalize(direction);
+}
+
+/// <summary>
+/// Handle input from the mouse scroll wheel
+/// </summary>
+/// <param name="window"></param>
+/// <param name="xOffset"></param>
+/// <param name="yOffset"></param>
+void scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
+{
+	cameraPanSpeed += yOffset;
+	if (cameraPanSpeed < 1.0f)
+	{
+		cameraPanSpeed = 1.0f;
+	}
+	else if (cameraPanSpeed > 50.0f)
+	{
+		cameraPanSpeed = 50.0f;
+	}
+}
+
+/// <summary>
+/// Handle kayboard input captures by GLFW
+/// </summary>
+/// <param name="window"></param>
+void ProcessInput(GLFWwindow* window)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	{
+		glfwSetWindowShouldClose(window, true);
+	}
+	else if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+	else if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	// set orthographic projection
+	else if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
+	{
+		if (!useOrthographicProjection)
+		{
+			useOrthographicProjection = true;
+			int width, height;
+			glfwGetWindowSize(window, &width, &height);
+			framebuffer_size_changed_callback(window, width, height);
+		}
+	}
+	// set perspective projection
+	else if (glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS)
+	{
+		if (useOrthographicProjection)
+		{
+			useOrthographicProjection = false;
+			int width, height;
+			glfwGetWindowSize(window, &width, &height);
+			framebuffer_size_changed_callback(window, width, height);
+		}
+	}
+
+	// pan camera position
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		cameraPosition += cameraDirection * cameraPanSpeed * deltaTime;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		cameraPosition -= cameraDirection * cameraPanSpeed * deltaTime;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		cameraPosition += glm::normalize(glm::cross(cameraUp, cameraDirection)) * cameraPanSpeed * deltaTime;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		cameraPosition -= glm::normalize(glm::cross(cameraUp, cameraDirection)) * cameraPanSpeed * deltaTime;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	{
+		cameraPosition.g -= cameraPanSpeed * deltaTime;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	{
+		cameraPosition.g += cameraPanSpeed * deltaTime;
+	}
+
+	// FoV
+	if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
+	{
+		fovDegrees -= fovScrollSpeed * deltaTime;
+		int width, height;
+		glfwGetWindowSize(window, &width, &height);
+		framebuffer_size_changed_callback(window, width, height);
+	}
+	else if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
+	{
+		fovDegrees += fovScrollSpeed * deltaTime;
+		int width, height;
+		glfwGetWindowSize(window, &width, &height);
+		framebuffer_size_changed_callback(window, width, height);
+	}
 }
