@@ -5,6 +5,7 @@
 
 #include "Shader.h"
 #include "Texture.h"
+#include "Camera.h"
 
 void framebuffer_size_changed_callback(GLFWwindow* window, int width, int height);
 void mouseCallback(GLFWwindow* window, double xPos, double yPos);
@@ -66,20 +67,15 @@ const glm::vec3 cubePositions[] = {
 	glm::vec3(-1.3f,  1.0f, -1.5f)
 };
 
+Camera mainCamera(glm::vec3(0.0f, 0.0f, 3.0f));
 bool useOrthographicProjection = false;
 glm::mat4 projection(1.0);
-glm::vec3 cameraPosition(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraDirection(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
-float cameraPanSpeed = 2.0f;
 float fovDegrees = 45.0f;
 float fovScrollSpeed = 5.0f;
 float deltaTime = 0.0f;
 float lastFrameTime = 0.0f;
 float mouseX = 0.0f, mouseY = 0.0f;
-float cameraPitch = 0.0f, cameraYaw = -90.0f;
 bool firstMouse = true;
-float mouseSensitivity = 0.1f;
 
 int main()
 {
@@ -175,12 +171,6 @@ int main()
 		// handle input
 		ProcessInput(window);
 
-		/* view transform.Think of this as the opposite of the camera's location.
-		* in order to make it appear like the camera is moving around a scene, we can apply
-		* the opposite of the camera's transform to all objects in a scene. Simply moving the camera would achieve
-		* nothing, since we're not actually interested in rendering the camera itself. */
-		glm::mat4 viewTransform = glm::lookAt(cameraPosition, cameraPosition + cameraDirection, cameraUp);
-
 		// render 
 		glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -188,7 +178,7 @@ int main()
 		textureShader.Use();
 		containerTexture.Use(0);
 		smilingFace.Use(1);		
-		textureShader.SetMatrix4("view", viewTransform);
+		textureShader.SetMatrix4("view", mainCamera.GetViewMatrix());
 		textureShader.SetMatrix4("projection", projection);
 		glBindVertexArray(meshVAO);
 
@@ -238,14 +228,7 @@ void mouseCallback(GLFWwindow* window, double xPos, double yPos)
 	mouseX = xPos;
 	mouseY = yPos;
 
-	cameraPitch += deltaY * mouseSensitivity;
-	cameraYaw += deltaX * mouseSensitivity;
-
-	glm::vec3 direction;
-	direction.x = glm::cos(glm::radians(cameraYaw)) * glm::cos(glm::radians(cameraPitch));
-	direction.y = glm::sin(glm::radians(cameraPitch));
-	direction.z = glm::sin(glm::radians(cameraYaw)) * glm::cos(glm::radians(cameraPitch));
-	cameraDirection = glm::normalize(direction);
+	mainCamera.ProcessLookInput(deltaX, deltaY);
 }
 
 /// <summary>
@@ -256,7 +239,7 @@ void mouseCallback(GLFWwindow* window, double xPos, double yPos)
 /// <param name="yOffset"></param>
 void scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
 {
-	cameraPanSpeed += yOffset;
+	float cameraPanSpeed = mainCamera.GetPanSpeed() + (float)yOffset;
 	if (cameraPanSpeed < 1.0f)
 	{
 		cameraPanSpeed = 1.0f;
@@ -265,6 +248,7 @@ void scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
 	{
 		cameraPanSpeed = 50.0f;
 	}
+	mainCamera.SetPanSpeed(cameraPanSpeed);
 }
 
 /// <summary>
@@ -310,32 +294,34 @@ void ProcessInput(GLFWwindow* window)
 	}
 
 	// pan camera position
+	glm::vec3 movement(0.0f, 0.0f, 0.0f);
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		cameraPosition += cameraDirection * cameraPanSpeed * deltaTime;
+		movement.z = 1.0f;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		cameraPosition -= cameraDirection * cameraPanSpeed * deltaTime;
+		movement.z = -1.0f;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		cameraPosition += glm::normalize(glm::cross(cameraUp, cameraDirection)) * cameraPanSpeed * deltaTime;
+		movement.x = -1.0f;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		cameraPosition -= glm::normalize(glm::cross(cameraUp, cameraDirection)) * cameraPanSpeed * deltaTime;
+		movement.x = 1.0f;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 	{
-		cameraPosition.g -= cameraPanSpeed * deltaTime;
+		movement.y = -1.0f;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 	{
-		cameraPosition.g += cameraPanSpeed * deltaTime;
+		movement.y = 1.0f;
 	}
+	mainCamera.ProcessMovementInput(movement, deltaTime);
 
 	// FoV
 	if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
