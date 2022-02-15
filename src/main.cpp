@@ -7,21 +7,71 @@
 #include "Texture.h"
 
 const float meshData[] = {
-	// position data	// color data		// uv coords
-	0.5f, 0.5f, 0.0f,	1.0f, 0.0f, 0.0f,	1.0f, 1.0f,
-	0.5f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,	1.0f, 0.0f,
-	-0.5f, -0.5f, 0.0f,	0.0f, 0.0f, 1.0f,	0.0f, 0.0f,
-	-0.5f, 0.5f, 0.0f,	1.0f, 1.0f, 0.0f,	0.0f, 1.0f
+	0.5f, 0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,
+	0.5f, -0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f,
+	-0.5f, -0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f,
+	-0.5f, 0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,
+
+	0.5f, 0.5f, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,
+	0.5f, -0.5f, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f,
+	-0.5f, -0.5f, -0.5f,	1.0f, 1.0f, 1.0f,		1.0f, 0.0f,
+	-0.5f, 0.5f, -0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,
+
+	0.5f, 0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,
+	-0.5f, 0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f,
+	-0.5f, 0.5f, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f,
+	0.5f, 0.5f, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,
+
+	0.5f, -0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f,
+	-0.5f, -0.5f, 0.5f,		1.0f, 1.0f, 1.0f,		1.0f, 0.0f,
+	-0.5f, -0.5f, -0.5f,	1.0f, 1.0f, 1.0f,		0.0f, 0.0f,
+	0.5f, -0.5f, -0.5f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f,
 };
 
 const int meshIndices[] = {
-	0, 1, 3,
-	1, 2, 3
+	0, 1, 3,	// front face
+	1, 2, 3,
+
+	3, 2, 7,	// left face
+	2, 6, 7,
+
+	7, 6, 4,	// back face
+	6, 5, 4,
+
+	4, 5, 0,	// right face
+	5, 1, 0,
+
+	8, 9, 11, // top face
+	9, 10, 11,
+
+	12, 13, 15,	// bottom face
+	13, 14, 15
 };
+
+const glm::vec3 cubePositions[] = {
+	glm::vec3(0.0f,  0.0f,  0.0f),
+	glm::vec3(2.0f,  5.0f, -15.0f),
+	glm::vec3(-1.5f, -2.2f, -2.5f),
+	glm::vec3(-3.8f, -2.0f, -12.3f),
+	glm::vec3(2.4f, -0.4f, -3.5f),
+	glm::vec3(-1.7f,  3.0f, -7.5f),
+	glm::vec3(1.3f, -2.0f, -2.5f),
+	glm::vec3(1.5f,  2.0f, -2.5f),
+	glm::vec3(1.5f,  0.2f, -1.5f),
+	glm::vec3(-1.3f,  1.0f, -1.5f)
+};
+
+bool useOrthographicProjection = false;
+glm::mat4 projection(1.0);
+glm::vec3 cameraPosition(0.0f, 0.0f, 3.0f);
+float cameraPanSpeed = 0.1f;
 
 void framebuffer_size_changed_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+	projection = useOrthographicProjection
+		? glm::ortho(0.0f, (float)width, 0.0f, (float)height, 0.1f, 100.0f)
+		: glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 }
 
 void ProcessInput(GLFWwindow* window)
@@ -37,7 +87,58 @@ void ProcessInput(GLFWwindow* window)
 	else if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	// set orthographic projection
+	else if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
+	{
+		if (!useOrthographicProjection)
+		{
+			useOrthographicProjection = true;
+			int width, height;
+			glfwGetWindowSize(window, &width, &height);
+			framebuffer_size_changed_callback(window, width, height);
+		}
+	}
+	// set perspective projection
+	else if (glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS)
+	{
+		if (useOrthographicProjection)
+		{
+			useOrthographicProjection = false;
+			int width, height;
+			glfwGetWindowSize(window, &width, &height);
+			framebuffer_size_changed_callback(window, width, height);
+		}
+	}
+
+	// pan camera position
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		cameraPosition.b -= 1.0f * cameraPanSpeed;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		cameraPosition.b += 1.0f * cameraPanSpeed;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		cameraPosition.r -= 1.0f * cameraPanSpeed;
 	}	
+	else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		cameraPosition.r += 1.0f * cameraPanSpeed;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	{
+		cameraPosition.g -= 1.0f * cameraPanSpeed;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	{
+		cameraPosition.g += 1.0f * cameraPanSpeed;
+	}
 }
 
 int main()
@@ -66,9 +167,9 @@ int main()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
-
-	glViewport(0, 0, 800, 600);
+		
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_changed_callback);
+	framebuffer_size_changed_callback(window, 800, 600);
 
 	Texture containerTexture("content/textures/container.jpg", false);
 	containerTexture.SetTextureSamplingMode(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
@@ -118,36 +219,46 @@ int main()
 	// Unbind the VAO, just to be safe;
 	glBindVertexArray(0);
 
+	glEnable(GL_DEPTH_TEST);
+
 	// start the main loop
 	while (!glfwWindowShouldClose(window))
 	{
 		// handle input
 		ProcessInput(window);
 
-		// matrix multiplication is not commutative: A*B != B*A. The order we apply these transforms has an impact 
-		// on the end result. Keep an eye out for it.
-		glm::mat4 transform(1.0f);
-		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-		transform = glm::rotate(transform, (float)glm::radians(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+		/* view transform.Think of this as the opposite of the camera's location.
+		* in order to make it appear like the camera is moving around a scene, we can apply
+		* the opposite of the camera's transform to all objects in a scene. Simply moving the camera would achieve
+		* nothing, since we're not actually interested in rendering the camera itself. */
+		glm::mat4 viewTransform(1.0f);
+		viewTransform = glm::translate(viewTransform, -cameraPosition);
+
 
 		// render 
 		glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		textureShader.Use();
 		containerTexture.Use(0);
-		smilingFace.Use(1);
-		textureShader.SetMatrix4("transform", transform);
+		smilingFace.Use(1);		
+		textureShader.SetMatrix4("view", viewTransform);
+		textureShader.SetMatrix4("projection", projection);
 		glBindVertexArray(meshVAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
-		float uniformScale = sin(glfwGetTime()) * 0.5f + 0.5f;
-		transform = glm::mat4(1.0f);
-		transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
-		transform = glm::scale(transform, glm::vec3(uniformScale, uniformScale, 1.0f));
-		transform = glm::rotate(transform, (float)glm::radians(glfwGetTime() * 0.5f), glm::vec3(0.0f, 0.0f, -1.0f));
-		textureShader.SetMatrix4("transform", transform);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+		for (unsigned int i = 0; i < (sizeof(cubePositions) / sizeof(cubePositions[0])); ++i)
+		{
+			glm::vec3 rotationAxis = i % 3 == 0
+				? -glm::vec3(0.5f, 1.0f, 0.0f)
+				: glm::vec3(0.5f, 1.0f, 0.0f);
+
+			glm::mat4 modelTransform(1.0f);
+			modelTransform = glm::translate(modelTransform, cubePositions[i]);
+			float angle = glm::radians(20.0f * (float)i);
+			modelTransform = glm::rotate(modelTransform, angle + ((float)glfwGetTime() * glm::radians(50.0f)), rotationAxis);
+			textureShader.SetMatrix4("model", modelTransform);
+			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, NULL);
+		}		
 
 		// glfw events and swap buffers
 		glfwSwapBuffers(window);
