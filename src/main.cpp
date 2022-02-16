@@ -6,7 +6,7 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Camera.h"
-#include "Mesh.h"
+#include "StaticMeshObject.h"
 
 void framebuffer_size_changed_callback(GLFWwindow* window, int width, int height);
 void mouseCallback(GLFWwindow* window, double xPos, double yPos);
@@ -112,21 +112,42 @@ int main()
 	glfwSetCursorPosCallback(window, mouseCallback);
 	glfwSetScrollCallback(window, scrollCallback);
 
-	// Set up the models
-	Texture containerTexture("content/textures/container.jpg", false);
-	containerTexture.SetTextureSamplingMode(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
+	// textures
+	std::shared_ptr<Texture> containerTexture(new Texture("content/textures/container.jpg", false));
+	containerTexture->SetTextureSamplingMode(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
 
-	Texture smilingFace("content/textures/awesomeface.png", true, GL_RGBA);
-	smilingFace.SetTextureSamplingMode(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
+	std::shared_ptr<Texture> smilingFace(new Texture("content/textures/awesomeface.png", true, GL_RGBA));
+	smilingFace->SetTextureSamplingMode(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
 		
-	Shader textureShader("shaders/simple-texture.vert", "shaders/simple-texture.frag");
-	textureShader.Use();
-	textureShader.SetInt("texture0", 0);
-	textureShader.SetInt("texture1", 1);
-	textureShader.SetFloat("blend_alpha", 0.2f);
+	// shaders
+	std::shared_ptr<Shader> textureShader(new Shader("shaders/simple-texture.vert", "shaders/simple-texture.frag"));
+	textureShader->Use();
+	textureShader->SetInt("texture0", 0);
+	textureShader->SetInt("texture1", 1);
+	textureShader->SetFloat("blend_alpha", 0.2f);
+	Shader::Unbind();
 
-	Material mat(textureShader, { {0, containerTexture}, {1, smilingFace} });
-	Mesh cube(cube_vertices, cube_indices, mat);
+	std::shared_ptr<Shader> lightShader(new Shader("shaders/simple-position-color.vert", "shaders/simple-color-unlit.frag"));
+	std::shared_ptr<Shader> colorShader(new Shader("shaders/simple-position.vert", "shaders/uniform-color.frag"));
+
+	// materials
+	std::shared_ptr<Material> textureMat(new Material(textureShader, { {0, containerTexture}, {1, smilingFace} }));
+
+	// meshes
+	std::shared_ptr<Mesh> cube(new Mesh(cube_vertices, cube_indices));
+
+	// objects
+	StaticMeshObject cubeObject(cube);
+	cubeObject.SetMaterial(std::shared_ptr<Material>(new Material(colorShader)));
+	cubeObject.GetMaterial()->Use();
+	cubeObject.GetMaterial()->SetColor("uniformColor", 1.0f, 0.5f, 0.31f, 1.0f);
+	StaticMeshObject lightCube(cube);
+	lightCube.SetMaterial(std::shared_ptr<Material>(new Material(lightShader)));
+
+	std::vector<StaticMeshObject*> sceneMeshes = {
+		&cubeObject,
+		&lightCube.SetPosition(glm::vec3(1.0f, 1.0f, -1.0f)).SetScale(glm::vec3(0.2f, 0.2f, 0.2f))
+	};
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -143,25 +164,13 @@ int main()
 		// render 
 		glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		textureShader.SetMatrix4("view", mainCamera.GetViewMatrix());
-		textureShader.SetMatrix4("projection", projection);
-		
-		cube.PreRender();
-
-		for (unsigned int i = 0; i < (sizeof(cubePositions) / sizeof(cubePositions[0])); ++i)
+				
+		for (auto& mesh : sceneMeshes)
 		{
-			glm::vec3 rotationAxis = i % 3 == 0
-				? -glm::vec3(0.5f, 1.0f, 0.0f)
-				: glm::vec3(0.5f, 1.0f, 0.0f);
-
-			glm::mat4 modelTransform(1.0f);
-			modelTransform = glm::translate(modelTransform, cubePositions[i]);
-			float angle = glm::radians(20.0f * (float)i);
-			modelTransform = glm::rotate(modelTransform, angle + ((float)glfwGetTime() * glm::radians(50.0f)), rotationAxis);
-			textureShader.SetMatrix4("model", modelTransform);
-
-			cube.Render();
+			mesh->PreRender();
+			mesh->GetMaterial()->SetMatrix4("view", mainCamera.GetViewMatrix());
+			mesh->GetMaterial()->SetMatrix4("projection", projection);
+			mesh->Render();
 		}
 
 		// glfw events and swap buffers

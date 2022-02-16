@@ -99,42 +99,42 @@ void Shader::Use()
 	glUseProgram(ID);
 }
 
-void Shader::SetBool(const std::string& name, bool value)
+void Shader::SetBool(const std::string& name, bool value) const
 {
 	glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
 }
 
-void Shader::SetInt(const std::string& name, int value)
+void Shader::SetInt(const std::string& name, int value) const
 {
 	glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
 }
 
-void Shader::SetFloat(const std::string& name, float value)
+void Shader::SetFloat(const std::string& name, float value) const
 {
 	glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 
-void Shader::SetVector2(const std::string& name, float x, float y)
+void Shader::SetVector2(const std::string& name, float x, float y) const
 {
 	glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
 }
 
-void Shader::SetVector3(const std::string& name, float x, float y, float z)
+void Shader::SetVector3(const std::string& name, float x, float y, float z) const
 {
 	glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
 }
 
-void Shader::SetVector4(const std::string& name, float x, float y, float z, float w)
+void Shader::SetVector4(const std::string& name, float x, float y, float z, float w) const
 {
 	glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
 }
 
-void Shader::SetColor(const std::string& name, float red, float green, float blue, float alpha)
+void Shader::SetColor(const std::string& name, float red, float green, float blue, float alpha) const
 {
 	SetVector4(name, red, green, blue, alpha);
 }
 
-void Shader::SetMatrix4(const std::string& name, glm::mat4 matrix)
+void Shader::SetMatrix4(const std::string& name, glm::mat4 matrix) const
 {
 	glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
 }

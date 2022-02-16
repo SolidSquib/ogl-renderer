@@ -42,6 +42,9 @@
     <ClCompile Include="src\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\StaticMeshObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\KHR\khrplatform.h">
@@ -917,6 +920,9 @@
     <ClInclude Include="include\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\StaticMeshObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\simple-color.frag" />
@@ -1333,5 +1339,6 @@
     <None Include="include\glm\gtx\wrap.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="shaders\simple-color-unlit.frag" />
   </ItemGroup>
 </Project>

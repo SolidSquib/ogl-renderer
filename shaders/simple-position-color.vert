@@ -3,13 +3,14 @@
 layout(location = 0) in vec3 inPos;
 layout(location = 1) in vec3 inCol;
 
-uniform vec3 offset;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
 out vec4 color;
 
 void main()
 {
-	vec3 finalPos = inPos+offset;
-	gl_Position = vec4(finalPos, 1.0);
+	gl_Position = projection * view * model * vec4(inPos, 1.0);
 	color = vec4(inCol, 1.0);
 }

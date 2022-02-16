@@ -21,7 +21,7 @@ struct Vertex
 class Mesh : IRenderable
 {
 public:
-	Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const Material& material);
+	Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
 	~Mesh();
 
 	void PreRender();
@@ -30,7 +30,6 @@ public:
 private:	
 	std::vector<Vertex> mVertices;
 	std::vector<unsigned int> mIndices;
-	Material mMaterial;
 
 	unsigned int VAO, VBO, EBO;
 

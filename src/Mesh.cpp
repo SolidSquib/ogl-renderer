@@ -1,9 +1,8 @@
 #include "..\include\Mesh.h"
 
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const Material& material)
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 	: mVertices(vertices),
-	mIndices(indices),
-	mMaterial(material)
+	mIndices(indices)
 {
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -14,16 +13,15 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>&
 
 Mesh::~Mesh()
 {
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
-	VAO = VBO = EBO = 0;
+	//glDeleteVertexArrays(1, &VAO);
+	//glDeleteBuffers(1, &VBO);
+	//glDeleteBuffers(1, &EBO);
+	//VAO = VBO = EBO = 0;
 }
 
 void Mesh::PreRender()
 {
 	glBindVertexArray(VAO);
-	mMaterial.Use();
 }
 
 void Mesh::Render()

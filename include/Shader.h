@@ -27,14 +27,14 @@ public:
 	void Use();
 
 	// functions for setting uniform variables
-	void SetBool(const std::string& name, bool value);
-	void SetInt(const std::string& name, int value);
-	void SetFloat(const std::string& name, float value);
-	void SetVector2(const std::string& name, float x, float y);
-	void SetVector3(const std::string& name, float x, float y, float z);
-	void SetVector4(const std::string& name, float x, float y, float z, float w);
-	void SetColor(const std::string& name, float red, float green, float blue, float alpha);
-	void SetMatrix4(const std::string& name, glm::mat4 matrix);
+	void SetBool(const std::string& name, bool value) const;
+	void SetInt(const std::string& name, int value) const;
+	void SetFloat(const std::string& name, float value) const;
+	void SetVector2(const std::string& name, float x, float y) const;
+	void SetVector3(const std::string& name, float x, float y, float z) const;
+	void SetVector4(const std::string& name, float x, float y, float z, float w) const;
+	void SetColor(const std::string& name, float red, float green, float blue, float alpha) const;
+	void SetMatrix4(const std::string& name, glm::mat4 matrix) const;
 
 	// getters for uniform values
 	bool GetBool(const std::string& name) const;

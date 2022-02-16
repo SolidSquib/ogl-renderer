@@ -158,6 +158,7 @@
     <ClCompile Include="src\Material.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\StaticMeshObject.cpp" />
     <ClCompile Include="src\stb_image\stb_image.cpp" />
     <ClCompile Include="src\Texture.cpp" />
   </ItemGroup>
@@ -451,6 +452,7 @@
     <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\IRenderable.h" />
     <ClInclude Include="include\Shader.h" />
+    <ClInclude Include="include\StaticMeshObject.h" />
     <ClInclude Include="include\stb_image\stb_image.h" />
     <ClInclude Include="include\Texture.h" />
   </ItemGroup>
@@ -591,6 +593,7 @@
     <None Include="include\glm\gtx\vector_angle.inl" />
     <None Include="include\glm\gtx\vector_query.inl" />
     <None Include="include\glm\gtx\wrap.inl" />
+    <None Include="shaders\simple-color-unlit.frag" />
     <None Include="shaders\simple-color.frag" />
     <None Include="shaders\simple-position-color.vert" />
     <None Include="shaders\simple-position.vert" />

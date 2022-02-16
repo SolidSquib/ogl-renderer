@@ -1,17 +1,17 @@
 #include "..\include\Material.h"
 
-Material::Material(const Shader& shader)
+Material::Material(std::shared_ptr<Shader> shader)
 	: mShader(shader)
 {
 }
 
-Material::Material(const Shader& shader, const Texture& baseTexture)
+Material::Material(std::shared_ptr<Shader> shader, std::shared_ptr<Texture> baseTexture)
 	: mShader(shader)
 {
 	mTextures[0] = { 0, baseTexture };
 }
 
-Material::Material(const Shader& shader, const std::vector<TextureMap>& textures)
+Material::Material(std::shared_ptr<Shader> shader, const std::vector<TextureMap>& textures)
 	: mShader(shader),
 	mTextures(textures)
 {
@@ -21,14 +21,14 @@ Material::~Material()
 {
 }
 
-void Material::SetTexture(const Texture& texture, unsigned int index)
+void Material::SetTexture(std::shared_ptr<Texture> texture, unsigned int index)
 {
 	int existingIndex = GetTextureMapIndex(index);
 	if (existingIndex >= 0)
 	{
 		mTextures[existingIndex].texture = texture;
 	}
-	else
+	else if (texture.get())
 	{
 		mTextures.push_back({ index, texture });
 	}
@@ -36,11 +36,17 @@ void Material::SetTexture(const Texture& texture, unsigned int index)
 
 void Material::Use()
 {
-	mShader.Use();
-
-	for (const auto& iter : mTextures)
+	if (mShader.get())
 	{
-		iter.texture.Use(iter.index);
+		mShader->Use();
+
+		for (const auto& iter : mTextures)
+		{
+			if (iter.texture.get())
+			{
+				iter.texture->Use(iter.index);
+			}			
+		}
 	}
 }
 
