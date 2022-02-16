@@ -926,9 +926,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\simple-color.frag" />
-    <None Include="shaders\simple-position.vert" />
     <None Include="shaders\simple-position-color.vert" />
-    <None Include="shaders\uniform-color.frag" />
     <None Include="shaders\simple-texture.frag" />
     <None Include="shaders\simple-texture.vert" />
     <None Include="include\glm\detail\func_common.inl">
@@ -1340,5 +1338,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="shaders\simple-color-unlit.frag" />
+    <None Include="shaders\simple-position-gouraud.vert" />
+    <None Include="shaders\uniform-color-gouraud.frag" />
+    <None Include="shaders\simple-position-phong.vert" />
+    <None Include="shaders\uniform-color-phong.frag" />
   </ItemGroup>
 </Project>
