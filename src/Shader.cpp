@@ -97,6 +97,14 @@ bool Shader::CheckProgramLinkage(unsigned int program) const
 void Shader::Use()
 {
 	glUseProgram(ID);
+
+	for (const auto& iter : mTextures)
+	{
+		if (iter.texture.get())
+		{
+			iter.texture->Use(iter.index);
+		}
+	}
 }
 
 void Shader::SetBool(const std::string& name, bool value) const
@@ -114,29 +122,50 @@ void Shader::SetFloat(const std::string& name, float value) const
 	glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 
-void Shader::SetVector2(const std::string& name, float x, float y) const
+void Shader::SetVector2(const std::string& name, const glm::vec2& vector) const
 {
-	glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
+	glUniform2f(glGetUniformLocation(ID, name.c_str()), vector.x, vector.y);
 }
 
-void Shader::SetVector3(const std::string& name, float x, float y, float z) const
+void Shader::SetVector3(const std::string& name, const glm::vec3& vector) const
 {
-	glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
+	glUniform3f(glGetUniformLocation(ID, name.c_str()), vector.x, vector.y, vector.z);
 }
 
-void Shader::SetVector4(const std::string& name, float x, float y, float z, float w) const
+void Shader::SetVector4(const std::string& name, const glm::vec4& vector) const
 {
-	glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
+	glUniform4f(glGetUniformLocation(ID, name.c_str()), vector.x, vector.y, vector.z, vector.w);
 }
 
-void Shader::SetColor(const std::string& name, float red, float green, float blue, float alpha) const
+void Shader::SetColor(const std::string& name, const glm::vec4& vector) const
 {
-	SetVector4(name, red, green, blue, alpha);
+	SetVector4(name, vector);
 }
 
 void Shader::SetMatrix4(const std::string& name, glm::mat4 matrix) const
 {
 	glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void Shader::SetTexture(std::shared_ptr<Texture> texture, unsigned int index)
+{
+	int existingIndex = GetTextureMapIndex(index);
+	if (existingIndex >= 0)
+	{
+		mTextures[existingIndex].texture = texture;
+	}
+	else if (texture.get())
+	{
+		mTextures.push_back({ index, texture });
+	}
+}
+
+void Shader::SetMaterial(const std::string& name, const Material& material)
+{
+	SetVector3(name + ".ambient", glm::vec3(material.ambientColor));
+	SetVector3(name + ".diffuse", glm::vec3(material.diffuseColor));
+	SetVector3(name + ".specular", glm::vec3(material.specularColor));
+	SetFloat(name + ".shininess", material.shininess);
 }
 
 bool Shader::GetBool(const std::string& name) const
@@ -160,36 +189,43 @@ float Shader::GetFloat(const std::string& name) const
 	return outValue;
 }
 
-void Shader::GetVector2(const std::string& name, float& outX, float& outY) const
+glm::vec2 Shader::GetVector2(const std::string& name) const
 {
 	float value[2];
 	glGetnUniformfv(ID, glGetUniformLocation(ID, name.c_str()), 2, value);
-	outX = value[0];
-	outY = value[1];
+	return glm::vec2(value[0], value[1]);
 }
 
-void Shader::GetVector3(const std::string& name, float& outX, float& outY, float& outZ) const
+glm::vec3 Shader::GetVector3(const std::string& name) const
 {
 	float value[3];
 	glGetnUniformfv(ID, glGetUniformLocation(ID, name.c_str()), 3, value);
-	outX = value[0];
-	outY = value[1];
-	outZ = value[2];
+	return glm::vec3(value[0], value[1], value[2]);
 }
 
-void Shader::GetVector4(const std::string& name, float& outX, float& outY, float& outZ, float& outW) const
+glm::vec4 Shader::GetVector4(const std::string& name) const
 {
 	float value[4];
 	glGetnUniformfv(ID, glGetUniformLocation(ID, name.c_str()), 4, value);
-	outX = value[0];
-	outY = value[1];
-	outZ = value[2];
-	outW = value[3];
+	return glm::vec4(value[0], value[1], value[2], value[3]);
 }
 
-void Shader::GetColor(const std::string& name, float& outR, float& outG, float& outB, float& outA) const
+glm::vec4 Shader::GetColor(const std::string& name) const
 {
-	GetVector4(name, outR, outG, outB, outA);
+	return GetVector4(name);
+}
+
+int Shader::GetTextureMapIndex(unsigned int index)
+{
+	for (unsigned int i = 0; i < mTextures.size(); ++i)
+	{
+		if (mTextures[i].index == index)
+		{
+			return i;
+		}
+	}
+
+	return -1;
 }
 
 void Shader::Unbind()

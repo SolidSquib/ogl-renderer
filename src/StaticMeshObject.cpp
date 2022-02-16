@@ -11,9 +11,39 @@ StaticMeshObject& StaticMeshObject::SetMesh(std::shared_ptr<Mesh> mesh)
 	return *this;
 }
 
-StaticMeshObject& StaticMeshObject::SetMaterial(std::shared_ptr<Material> material)
+StaticMeshObject& StaticMeshObject::SetShader(std::shared_ptr<Shader> shader)
+{
+	mShader = shader;
+	return *this;
+}
+
+StaticMeshObject& StaticMeshObject::SetMaterial(const Material& material)
 {
 	mMaterial = material;
+	return *this;
+}
+
+StaticMeshObject& StaticMeshObject::SetAmbientColor(const glm::vec3& ambientColor)
+{
+	mMaterial.ambientColor = ambientColor;
+	return *this;
+}
+
+StaticMeshObject& StaticMeshObject::SetDiffuseColor(const glm::vec3& diffuseColor)
+{
+	mMaterial.diffuseColor = diffuseColor;
+	return *this;
+}
+
+StaticMeshObject& StaticMeshObject::SetSpecularColor(const glm::vec3& specularColor)
+{
+	mMaterial.specularColor = specularColor;
+	return *this;
+}
+
+StaticMeshObject& StaticMeshObject::SetShininess(const float& shininess)
+{
+	mMaterial.shininess = shininess;
 	return *this;
 }
 
@@ -48,14 +78,15 @@ void StaticMeshObject::PreRender()
 	if (mMesh.get())
 	{
 		mMesh->PreRender();
-		mMaterial->Use();
+		mShader->Use();
 
 		// Set transforms
 		glm::mat4 meshTransform(1.0f);
 		meshTransform = glm::translate(meshTransform, mPosition);
-		// todo rotation
 		meshTransform = glm::scale(meshTransform, mScale);
-		mMaterial->SetMatrix4("model", meshTransform);
+
+		mShader->SetMatrix4("model", meshTransform);
+		mShader->SetMaterial("material", mMaterial);
 	}	
 }
 

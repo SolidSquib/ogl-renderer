@@ -7,6 +7,7 @@
 #include "Texture.h"
 #include "Camera.h"
 #include "StaticMeshObject.h"
+#include "Light.h"
 
 void framebuffer_size_changed_callback(GLFWwindow* window, int width, int height);
 void mouseCallback(GLFWwindow* window, double xPos, double yPos);
@@ -138,26 +139,32 @@ int main()
 	textureShader->SetFloat("blend_alpha", 0.2f);
 	Shader::Unbind();
 
-	std::shared_ptr<Shader> lightShader(new Shader("shaders/simple-position-color.vert", "shaders/simple-color-unlit.frag"));
+	std::shared_ptr<Shader> lightShader(new Shader("shaders/simple-position-color.vert", "shaders/uniform-color-unlit.frag"));
 	std::shared_ptr<Shader> colorShader(new Shader("shaders/simple-position-phong.vert", "shaders/uniform-color-phong.frag"));
 	//std::shared_ptr<Shader> colorShader(new Shader("shaders/simple-position-gouraud.vert", "shaders/uniform-color-gouraud.frag"));
 
-	// materials
-	std::shared_ptr<Material> textureMat(new Material(textureShader, { {0, containerTexture}, {1, smilingFace} }));
-
 	// meshes
-	std::shared_ptr<Mesh> cube(new Mesh(cube_vertices, cube_indices, EVA_POSITION | EVA_NORMAL | EVA_COLOR ));
+	std::shared_ptr<Mesh> cube(new Mesh(cube_vertices, cube_indices, EVA_POSITION | EVA_NORMAL ));
+
+	// materials 
+	Material chrome;
+	chrome.ambientColor = glm::vec3(0.25f, 0.25f, 0.25f);
+	chrome.diffuseColor = glm::vec3(0.4f, 0.4f, 0.4f);
+	chrome.specularColor = glm::vec3(0.774597f, 0.774597f, 0.774597f);
+	chrome.shininess = 128.0f * 0.6f;
+
+	Light light;
+	light.ambient = glm::vec3(0.0f, 0.8f, 1.0f);
+	light.diffuse = glm::vec3(1.0f, 0.5f, 0.31f);
+	light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
 
 	// objects
-	glm::vec4 lightColor(1.0f, 1.0f, 1.0f, 1.0f);
 	StaticMeshObject cubeObject(cube);
-	cubeObject.SetMaterial(std::shared_ptr<Material>(new Material(colorShader)));
-	cubeObject.GetMaterial()->Use();
-	cubeObject.GetMaterial()->SetColor("uniformColor", 1.0f, 0.5f, 0.31f, 1.0f);
-	cubeObject.GetMaterial()->SetColor("lightColor", lightColor.r, lightColor.g, lightColor.b, lightColor.a);
-	cubeObject.GetMaterial()->SetColor("ambientLightColor", 0.0f, 0.8f, 1.0f, 1.0f);
+	cubeObject.SetShader(colorShader);
+	cubeObject.SetMaterial(chrome);
+
 	StaticMeshObject lightCube(cube);
-	lightCube.SetMaterial(std::shared_ptr<Material>(new Material(lightShader)));
+	lightCube.SetShader(lightShader);
 
 	std::vector<StaticMeshObject*> sceneMeshes = {
 		&cubeObject,
@@ -184,14 +191,22 @@ int main()
 		float z = glm::cos((float)glfwGetTime());
 		float y = glm::cos((float)glfwGetTime() * 3);
 		lightCube.SetPosition(cubeObject.GetPosition() + (glm::vec3(x, y, z) * 2.0f));
+		lightCube.SetDiffuseColor(light.diffuse);
+
+		glm::vec4 lightPositionViewSpace = mainCamera.GetViewMatrix() * glm::vec4(lightCube.GetPosition(), 1.0f);
+		light.position = lightPositionViewSpace;
 
 		for (auto& mesh : sceneMeshes)
 		{
 			mesh->PreRender();
-			mesh->GetMaterial()->SetMatrix4("view", mainCamera.GetViewMatrix());
-			mesh->GetMaterial()->SetMatrix4("projection", projection);
-			mesh->GetMaterial()->SetVector3("lightPosition", lightCube.GetPosition().x, lightCube.GetPosition().y, lightCube.GetPosition().z);
-			mesh->GetMaterial()->SetVector3("viewPosition", mainCamera.GetLocation().x, mainCamera.GetLocation().y, mainCamera.GetLocation().z);
+			mesh->GetShader()->SetMatrix4("view", mainCamera.GetViewMatrix());
+			mesh->GetShader()->SetMatrix4("projection", projection);			
+			mesh->GetShader()->SetVector3("viewPosition", mainCamera.GetLocation());
+
+			mesh->GetShader()->SetVector3("light.ambient", light.ambient);
+			mesh->GetShader()->SetVector3("light.diffuse", light.diffuse);
+			mesh->GetShader()->SetVector3("light.specular", light.specular);
+			mesh->GetShader()->SetVector3("light.position", light.position);
 			mesh->Render();
 		}
 
