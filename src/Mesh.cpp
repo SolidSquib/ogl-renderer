@@ -58,7 +58,7 @@ void Mesh::SetupMesh()
 	if ((mVertexAttributes & EVA_UV) == EVA_UV)
 	{
 		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(glm::vec3)));
-		glEnableVertexAttribArray(2);	
+		glEnableVertexAttribArray(3);	
 	}
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);

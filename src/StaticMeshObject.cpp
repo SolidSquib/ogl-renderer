@@ -23,6 +23,12 @@ StaticMeshObject& StaticMeshObject::SetMaterial(const Material& material)
 	return *this;
 }
 
+StaticMeshObject& StaticMeshObject::SetDiffuseMap(const std::shared_ptr<Texture>& diffuseMap)
+{
+	mMaterial.diffuseMap = diffuseMap;
+	return *this;
+}
+
 StaticMeshObject& StaticMeshObject::SetAmbientColor(const glm::vec3& ambientColor)
 {
 	mMaterial.ambientColor = ambientColor;

@@ -97,14 +97,6 @@ bool Shader::CheckProgramLinkage(unsigned int program) const
 void Shader::Use()
 {
 	glUseProgram(ID);
-
-	for (const auto& iter : mTextures)
-	{
-		if (iter.texture.get())
-		{
-			iter.texture->Use(iter.index);
-		}
-	}
 }
 
 void Shader::SetBool(const std::string& name, bool value) const
@@ -158,10 +150,21 @@ void Shader::SetTexture(std::shared_ptr<Texture> texture, unsigned int index)
 	{
 		mTextures.push_back({ index, texture });
 	}
+
+	unsigned int useTexture = GL_TEXTURE0 + index;
+	glActiveTexture(useTexture);
+	glBindTexture(GL_TEXTURE_2D, texture.get() ? texture->GetID() : 0);
 }
 
 void Shader::SetMaterial(const std::string& name, const Material& material)
 {
+	SetTexture(material.diffuseMap, 0);
+	SetTexture(material.specularMap, 1);
+	SetTexture(material.emissionMap, 2);
+
+	SetInt(name + ".diffuseMap", 0);
+	SetInt(name + ".specularMap", 1);
+	SetInt(name + ".emissionMap", 2);
 	SetVector3(name + ".ambient", glm::vec3(material.ambientColor));
 	SetVector3(name + ".diffuse", glm::vec3(material.diffuseColor));
 	SetVector3(name + ".specular", glm::vec3(material.specularColor));

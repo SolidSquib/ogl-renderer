@@ -7,6 +7,7 @@ layout(location = 3) in vec2 inUV;
 
 out vec3 position;
 out vec3 normal;
+out vec2 tex_coords;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -21,4 +22,5 @@ void main()
 
 	// should not run these operations on the GPU, it's very innefficient
 	normal = mat3(transpose(inverse(view))) * inNormal;
+	tex_coords = inUV;
 }

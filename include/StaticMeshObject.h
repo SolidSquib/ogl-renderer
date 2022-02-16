@@ -11,6 +11,7 @@ public:
 	StaticMeshObject& SetMesh(std::shared_ptr<Mesh> mesh);
 	StaticMeshObject& SetShader(std::shared_ptr<Shader> shader);
 	StaticMeshObject& SetMaterial(const Material& material);
+	StaticMeshObject& SetDiffuseMap(const std::shared_ptr<Texture>& diffuseMap);
 	StaticMeshObject& SetAmbientColor(const glm::vec3& ambientColor);
 	StaticMeshObject& SetDiffuseColor(const glm::vec3& diffuseColor);
 	StaticMeshObject& SetSpecularColor(const glm::vec3& specularColor);

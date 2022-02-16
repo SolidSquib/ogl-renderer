@@ -36,13 +36,6 @@ Texture::Texture(const char* texturePath, bool flipVertically, unsigned int glTe
 	stbi_image_free(data);
 }
 
-void Texture::Use(unsigned int index) const
-{
-	unsigned int useTexture = GL_TEXTURE0 + index;
-	glActiveTexture(useTexture);
-	glBindTexture(GL_TEXTURE_2D, ID);
-}
-
 void Texture::SetTextureWrappingMode(unsigned int paramu, unsigned int paramv)
 {
 	glBindTexture(GL_TEXTURE_2D, ID);
