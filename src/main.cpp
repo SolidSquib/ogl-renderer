@@ -191,12 +191,7 @@ int main()
 	container.SetShader(colorShader);
 	container.SetMaterial(containerMaterial);
 
-	StaticMeshObject lightCube(cube);
-	lightCube.SetShader(lightShader);
-
-	std::vector<StaticMeshObject> sceneMeshes = {
-		lightCube.SetPosition(glm::vec3(1.0f, 1.0f, 0.0f)).SetScale(glm::vec3(0.2f, 0.2f, 0.2f))
-	};
+	std::vector<StaticMeshObject> sceneMeshes;
 		
 	std::vector<PointLight*> scenePointLights = {
 		&pointLight,
@@ -223,12 +218,6 @@ int main()
 		// render 
 		glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				
-		//float x = glm::sin((float)glfwGetTime());
-		//float z = glm::cos((float)glfwGetTime());
-		//float y = glm::cos((float)glfwGetTime() * 3);
-		sceneMeshes[0].SetPosition(pointLight.position);
-		sceneMeshes[0].SetDiffuseColor(pointLight.diffuse);
 				
 		for (auto& mesh : sceneMeshes)
 		{
