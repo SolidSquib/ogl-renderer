@@ -14,6 +14,7 @@
 
 #include "Texture.h"
 #include "Material.h"
+#include "Light.h"
 
 class Shader 
 {
@@ -42,6 +43,9 @@ public:
 	void SetMatrix4(const std::string& name, glm::mat4 matrix) const;
 	void SetTexture(std::shared_ptr<Texture> texture, unsigned int index);
 	void SetMaterial(const std::string& name, const Material& material);
+	void SetDirectionalLight(const std::string& name, const DirectionalLight& light, unsigned int lightIndex);
+	void SetPointLight(const std::string& name, const PointLight& light, unsigned int lightIndex);
+	void SetSpotLight(const std::string& name, const SpotLight& light, unsigned int lightIndex);
 
 	// getters for uniform values
 	bool GetBool(const std::string& name) const;

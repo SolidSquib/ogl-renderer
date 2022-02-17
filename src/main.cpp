@@ -149,10 +149,42 @@ int main()
 	containerMaterial.emissionMap = matrix;
 	containerMaterial.shininess = 128.0f * 0.6f;
 
-	Light light;
-	light.ambient = glm::vec3(0.0f, 0.8f, 1.0f);
-	light.diffuse = glm::vec3(1.0f, 0.5f, 0.31f);
-	light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	// lights
+	PointLight pointLight;
+	pointLight.position = glm::vec3(-1.0f, 1.0f, -0.8f);
+	pointLight.ambient = glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f;
+	pointLight.diffuse = glm::vec3(1.0f, 0.5f, 0.31f);
+	pointLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	pointLight.constant = 1.0f;
+	pointLight.linear = 0.09f;
+	pointLight.quadratic = 0.032f;
+
+	DirectionalLight directionalLight;
+	directionalLight.direction = glm::normalize(glm::vec3(-0.2f, -1.0f, -0.3f));
+	directionalLight.ambient = glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f;
+	directionalLight.diffuse = glm::vec3(1.0f, 1.0f, 1.0f) * 0.5f;
+	directionalLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+
+	PointLight greenLight;
+	greenLight.position = glm::vec3(1.0f, 1.0f, -1.3f);
+	greenLight.ambient = glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f;
+	greenLight.diffuse = glm::vec3(0.0f, 1.0f, 0.21f);
+	greenLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	greenLight.constant = 1.0f;
+	greenLight.linear = 0.09f;
+	greenLight.quadratic = 0.032f;
+
+	SpotLight spotLight;
+	spotLight.position = glm::vec3(1.0f, 1.0f, -1.3f);
+	spotLight.ambient = glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f;
+	spotLight.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+	spotLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	spotLight.constant = 1.0f;
+	spotLight.linear = 0.045f;
+	spotLight.quadratic = 0.0075f;
+	spotLight.innerCutoff = glm::cos(glm::radians(12.5f));
+	spotLight.outerCutoff = glm::cos(glm::radians(17.5f));
+	std::cout << spotLight.innerCutoff << ",  " << spotLight.outerCutoff << std::endl;
 
 	// objects
 	StaticMeshObject container(cube);
@@ -162,11 +194,20 @@ int main()
 	StaticMeshObject lightCube(cube);
 	lightCube.SetShader(lightShader);
 
-	std::vector<StaticMeshObject*> sceneMeshes = {
-		&container,
-		&lightCube.SetPosition(glm::vec3(1.0f, 1.0f, 0.0f)).SetScale(glm::vec3(0.2f, 0.2f, 0.2f))
+	std::vector<StaticMeshObject> sceneMeshes = {
+		lightCube.SetPosition(glm::vec3(1.0f, 1.0f, 0.0f)).SetScale(glm::vec3(0.2f, 0.2f, 0.2f))
 	};
 		
+	std::vector<PointLight*> scenePointLights = {
+		&pointLight,
+		&greenLight
+	};
+
+	for (unsigned int i = 0; i < 10; ++i)
+	{
+		sceneMeshes.push_back(container.SetPosition(cubePositions[i]));
+	}
+
 	glEnable(GL_DEPTH_TEST);
 
 	// start the main loop
@@ -180,32 +221,47 @@ int main()
 		ProcessInput(window);
 
 		// render 
-		glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
+		glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				
-		float x = glm::sin((float)glfwGetTime());
-		float z = glm::cos((float)glfwGetTime());
-		float y = glm::cos((float)glfwGetTime() * 3);
-		lightCube.SetPosition(container.GetPosition() + (glm::vec3(x, y, z) * 2.0f));
-		lightCube.SetDiffuseColor(light.diffuse);
-
-		glm::vec4 lightPositionViewSpace = mainCamera.GetViewMatrix() * glm::vec4(lightCube.GetPosition(), 1.0f);
-		light.position = lightPositionViewSpace;
-
+		//float x = glm::sin((float)glfwGetTime());
+		//float z = glm::cos((float)glfwGetTime());
+		//float y = glm::cos((float)glfwGetTime() * 3);
+		sceneMeshes[0].SetPosition(pointLight.position);
+		sceneMeshes[0].SetDiffuseColor(pointLight.diffuse);
+				
 		for (auto& mesh : sceneMeshes)
 		{
-			mesh->PreRender();
-			mesh->GetShader()->SetMatrix4("view", mainCamera.GetViewMatrix());
-			mesh->GetShader()->SetMatrix4("projection", projection);			
-			mesh->GetShader()->SetVector3("viewPosition", mainCamera.GetLocation());
+			mesh.SetRotation(mesh.GetRotation() + deltaTime * 0.2f);
 
-			mesh->GetShader()->SetVector3("light.ambient", light.ambient);
-			mesh->GetShader()->SetVector3("light.diffuse", light.diffuse);
-			mesh->GetShader()->SetVector3("light.specular", light.specular);
-			mesh->GetShader()->SetVector3("light.position", light.position);
+			mesh.PreRender();
+			mesh.GetShader()->SetMatrix4("view", mainCamera.GetViewMatrix());
+			mesh.GetShader()->SetMatrix4("projection", projection);
 
-			mesh->GetShader()->SetFloat("time", (float)glfwGetTime());
-			mesh->Render();
+			// lights
+			DirectionalLight lightCopy = directionalLight;
+			lightCopy.direction = glm::transpose(glm::inverse(mainCamera.GetViewMatrix())) * glm::vec4(directionalLight.direction, 0.0f);
+			mesh.GetShader()->SetDirectionalLight("directionalLight", lightCopy, 0);
+
+			SpotLight spotLightCopy = spotLight;
+			spotLightCopy.direction = glm::vec3(0.0f, 0.0f, -1.0f);
+			spotLightCopy.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			mesh.GetShader()->SetSpotLight("spotLights", spotLightCopy, 0);
+
+			float epsilon = spotLight.innerCutoff - spotLight.outerCutoff;
+			std::cout << spotLight.innerCutoff << " - " << spotLight.outerCutoff << " = " << epsilon << std::endl;
+			float intensity = (1.0f - spotLight.outerCutoff) / epsilon;
+			std::cout << "intensity at center: " << intensity << std::endl;
+
+			for (int i = 0; i < scenePointLights.size(); ++i)
+			{
+				PointLight pointCopy = *scenePointLights[i];
+				pointCopy.position = mainCamera.GetViewMatrix() * glm::vec4(pointCopy.position, 1.0f);
+				mesh.GetShader()->SetPointLight("pointLights", pointCopy, i);
+			}
+
+			mesh.GetShader()->SetFloat("time", (float)glfwGetTime());
+			mesh.Render();
 		}
 
 		// glfw events and swap buffers

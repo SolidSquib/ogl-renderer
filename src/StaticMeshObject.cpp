@@ -90,6 +90,9 @@ void StaticMeshObject::PreRender()
 		glm::mat4 meshTransform(1.0f);
 		meshTransform = glm::translate(meshTransform, mPosition);
 		meshTransform = glm::scale(meshTransform, mScale);
+		meshTransform = glm::rotate(meshTransform, mRotation.x, glm::vec3(0.0f, 0.0f, -1.0f)); // roll
+		meshTransform = glm::rotate(meshTransform, mRotation.y, glm::vec3(1.0f, 0.0f, 0.0f));  // pitch
+		meshTransform = glm::rotate(meshTransform, mRotation.z, glm::vec3(0.0f, 1.0f, 0.0f));  // yaw
 
 		mShader->SetMatrix4("model", meshTransform);
 		mShader->SetMaterial("material", mMaterial);

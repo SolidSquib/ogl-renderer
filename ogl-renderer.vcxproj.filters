@@ -1342,5 +1342,6 @@
     <None Include="shaders\uniform-color-gouraud.frag" />
     <None Include="shaders\simple-position-phong.vert" />
     <None Include="shaders\uniform-color-phong.frag" />
+    <None Include="shaders\uniform-color-unlit.frag" />
   </ItemGroup>
 </Project>
