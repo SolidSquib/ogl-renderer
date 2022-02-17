@@ -131,7 +131,7 @@ void main()
 {
 	vec4 diffuseColor = texture(material.diffuseMap, frag_tex_coords);
 	vec4 specularAmount = texture(material.specularMap, frag_tex_coords);
-	vec4 emissionColor = texture(material.emissionMap, DistortUVOverTime(frag_tex_coords, 0.01, 5.0, 5.0, 0.5));
+	vec4 emissionColor = texture(material.emissionMap, DistortUVOverTime(frag_tex_coords, 0.01, 5.0, 5.0, 1.5));
 	
 	vec4 emission = vec4(0.0);
 	if (specularAmount.xyz == vec3(0.0))
@@ -153,5 +153,5 @@ void main()
 		resultColor += CalculateSpotLight(spotLights[i], diffuseColor, specularAmount, position, normal, viewDirection);
 	}
 	
-	fragColor = resultColor;
+	fragColor = resultColor + emission;
 }

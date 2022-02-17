@@ -184,7 +184,6 @@ int main()
 	spotLight.quadratic = 0.0075f;
 	spotLight.innerCutoff = glm::cos(glm::radians(12.5f));
 	spotLight.outerCutoff = glm::cos(glm::radians(17.5f));
-	std::cout << spotLight.innerCutoff << ",  " << spotLight.outerCutoff << std::endl;
 
 	// objects
 	StaticMeshObject container(cube);
@@ -236,11 +235,6 @@ int main()
 			spotLightCopy.direction = glm::vec3(0.0f, 0.0f, -1.0f);
 			spotLightCopy.position = glm::vec3(0.0f, 0.0f, 0.0f);
 			mesh.GetShader()->SetSpotLight("spotLights", spotLightCopy, 0);
-
-			float epsilon = spotLight.innerCutoff - spotLight.outerCutoff;
-			std::cout << spotLight.innerCutoff << " - " << spotLight.outerCutoff << " = " << epsilon << std::endl;
-			float intensity = (1.0f - spotLight.outerCutoff) / epsilon;
-			std::cout << "intensity at center: " << intensity << std::endl;
 
 			for (int i = 0; i < scenePointLights.size(); ++i)
 			{
