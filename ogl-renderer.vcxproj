@@ -159,9 +159,10 @@
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\managers\TextureManager.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Shader.cpp" />
-    <ClCompile Include="src\StaticMeshObject.cpp" />
+    <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\stb_image\stb_image.cpp" />
     <ClCompile Include="src\Texture.cpp" />
   </ItemGroup>
@@ -452,11 +453,12 @@
     <ClInclude Include="include\glm\vector_relational.hpp" />
     <ClInclude Include="include\KHR\khrplatform.h" />
     <ClInclude Include="include\Light.h" />
+    <ClInclude Include="include\managers\TextureManager.h" />
     <ClInclude Include="include\Material.h" />
     <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\IRenderable.h" />
     <ClInclude Include="include\Shader.h" />
-    <ClInclude Include="include\StaticMeshObject.h" />
+    <ClInclude Include="include\Model.h" />
     <ClInclude Include="include\stb_image\stb_image.h" />
     <ClInclude Include="include\Texture.h" />
   </ItemGroup>

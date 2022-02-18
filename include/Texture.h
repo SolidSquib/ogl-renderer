@@ -6,15 +6,29 @@
 
 class Texture
 {
-private:
-	unsigned int ID = 0;
-
+	friend class TextureManager;
 public:
-	Texture(const char* texturePath, bool flipVertically);
-	Texture(const char* texturePath, bool flipVertically, unsigned int glTextureType);
+	enum ETextureType {
+		TEX_DIFFUSE,
+		TEX_SPECULAR,
+		TEX_NORMAL,
+		TEX_EMISSION
+	};
+
+public:	
+	~Texture();
 
 	void SetTextureWrappingMode(unsigned int paramu, unsigned int paramv);
 	void SetTextureSamplingMode(unsigned int paramMin, unsigned int paramMag);
 
-	unsigned int GetID() const { return ID; }
+	unsigned int GetID() const { return mID; }
+	unsigned int GetType() const { return mType; }
+	std::string GetPath() const { return mPath; }
+
+private:
+	unsigned int mID = 0;
+	ETextureType mType = TEX_DIFFUSE;
+	std::string mPath = "";
+
+	Texture() {}
 };

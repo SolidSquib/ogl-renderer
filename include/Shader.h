@@ -41,7 +41,6 @@ public:
 	void SetVector4(const std::string& name, const glm::vec4& vector) const;
 	void SetColor(const std::string& name, const glm::vec4& color) const;
 	void SetMatrix4(const std::string& name, glm::mat4 matrix) const;
-	void SetTexture(std::shared_ptr<Texture> texture, unsigned int index);
 	void SetMaterial(const std::string& name, const Material& material);
 	void SetDirectionalLight(const std::string& name, const DirectionalLight& light, unsigned int lightIndex);
 	void SetPointLight(const std::string& name, const PointLight& light, unsigned int lightIndex);
@@ -55,7 +54,6 @@ public:
 	glm::vec3 GetVector3(const std::string& name) const;
 	glm::vec4 GetVector4(const std::string& name) const;
 	glm::vec4 GetColor(const std::string& name) const;
-	int GetTextureMapIndex(unsigned int index);
 
 	bool IsValid() const { return ID != 0; }
 
@@ -63,7 +61,6 @@ public:
 
 private:
 	unsigned int ID = 0;
-	std::vector<TextureMap> mTextures;
 
 	bool CheckShaderCompilation(unsigned int shader) const;
 	bool CheckProgramLinkage(unsigned int shaderProgram) const;

@@ -4,9 +4,9 @@
 #include <algorithm>
 
 #include "Shader.h"
-#include "Texture.h"
+#include "managers/TextureManager.h"
 #include "Camera.h"
-#include "StaticMeshObject.h"
+#include "Model.h"
 #include "Light.h"
 
 void framebuffer_size_changed_callback(GLFWwindow* window, int width, int height);
@@ -125,29 +125,28 @@ int main()
 	glfwSetScrollCallback(window, scrollCallback);
 
 	// textures
-	std::shared_ptr<Texture> containerDiffuse(new Texture("content/textures/container2.png", false, GL_RGBA));
-	containerDiffuse->SetTextureSamplingMode(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
+	std::shared_ptr<Texture> containerDiffuse = TextureManager::Get().RequestTexture("../content/textures/container2.png");
+	TextureManager::Get().SetTextureType(containerDiffuse, Texture::TEX_DIFFUSE);
 
-	std::shared_ptr<Texture> containerSpecular(new Texture("content/textures/container2_specular.png", false, GL_RGBA));
-	containerSpecular->SetTextureSamplingMode(GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR);
+	std::shared_ptr<Texture> containerSpecular = TextureManager::Get().RequestTexture("../content/textures/container2_specular.png");
+	TextureManager::Get().SetTextureType(containerSpecular, Texture::TEX_SPECULAR);
 
-	std::shared_ptr<Texture> matrix(new Texture("content/textures/matrix.jpg", false, GL_RGB));
-	matrix->SetTextureSamplingMode(GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST);
+	std::shared_ptr<Texture> matrix = TextureManager::Get().RequestTexture("../content/textures/matrix.jpg");
+	TextureManager::Get().SetTextureType(matrix, Texture::TEX_EMISSION);
 
 	// shaders
-	std::shared_ptr<Shader> lightShader(new Shader("shaders/simple-position-color.vert", "shaders/uniform-color-unlit.frag"));
-	std::shared_ptr<Shader> colorShader(new Shader("shaders/simple-position-phong.vert", "shaders/uniform-color-phong.frag"));
-	//std::shared_ptr<Shader> colorShader(new Shader("shaders/simple-position-gouraud.vert", "shaders/uniform-color-gouraud.frag"));
-
-	// meshes
-	std::shared_ptr<Mesh> cube(new Mesh(cube_vertices, cube_indices, EVA_POSITION | EVA_NORMAL | EVA_UV));
+	std::shared_ptr<Shader> lightShader(new Shader("../shaders/simple-position-color.vert", "../shaders/uniform-color-unlit.frag"));
+	std::shared_ptr<Shader> colorShader(new Shader("../shaders/simple-position-phong.vert", "../shaders/uniform-color-phong.frag"));
 
 	// materials 
 	Material containerMaterial;
-	containerMaterial.diffuseMap = containerDiffuse;
-	containerMaterial.specularMap = containerSpecular;
-	containerMaterial.emissionMap = matrix;
+	containerMaterial.diffuseColor = glm::vec3(1.0f, 0.5f, 0.31f);
+	containerMaterial.textures = { containerDiffuse, containerSpecular, matrix };
 	containerMaterial.shininess = 128.0f * 0.6f;
+
+	// meshes
+	std::shared_ptr<Mesh> cube(new Mesh(cube_vertices, cube_indices, EVA_POSITION | EVA_NORMAL | EVA_UV));
+	cube->SetMaterial(containerMaterial);
 
 	// lights
 	PointLight pointLight;
@@ -186,11 +185,10 @@ int main()
 	spotLight.outerCutoff = glm::cos(glm::radians(17.5f));
 
 	// objects
-	StaticMeshObject container(cube);
+	Model container(cube);
 	container.SetShader(colorShader);
-	container.SetMaterial(containerMaterial);
 
-	std::vector<StaticMeshObject> sceneMeshes;
+	std::vector<Model> sceneMeshes;
 		
 	std::vector<PointLight*> scenePointLights = {
 		&pointLight,
@@ -221,30 +219,28 @@ int main()
 		for (auto& mesh : sceneMeshes)
 		{
 			mesh.SetRotation(mesh.GetRotation() + deltaTime * 0.2f);
-
-			mesh.PreRender();
-			mesh.GetShader()->SetMatrix4("view", mainCamera.GetViewMatrix());
-			mesh.GetShader()->SetMatrix4("projection", projection);
+			colorShader->SetMatrix4("view", mainCamera.GetViewMatrix());
+			colorShader->SetMatrix4("projection", projection);
 
 			// lights
 			DirectionalLight lightCopy = directionalLight;
 			lightCopy.direction = glm::transpose(glm::inverse(mainCamera.GetViewMatrix())) * glm::vec4(directionalLight.direction, 0.0f);
-			mesh.GetShader()->SetDirectionalLight("directionalLight", lightCopy, 0);
+			colorShader->SetDirectionalLight("directionalLight", lightCopy, 0);
 
 			SpotLight spotLightCopy = spotLight;
 			spotLightCopy.direction = glm::vec3(0.0f, 0.0f, -1.0f);
 			spotLightCopy.position = glm::vec3(0.0f, 0.0f, 0.0f);
-			mesh.GetShader()->SetSpotLight("spotLights", spotLightCopy, 0);
+			colorShader->SetSpotLight("spotLights", spotLightCopy, 0);
 
 			for (int i = 0; i < scenePointLights.size(); ++i)
 			{
 				PointLight pointCopy = *scenePointLights[i];
 				pointCopy.position = mainCamera.GetViewMatrix() * glm::vec4(pointCopy.position, 1.0f);
-				mesh.GetShader()->SetPointLight("pointLights", pointCopy, i);
+				colorShader->SetPointLight("pointLights", pointCopy, i);
 			}
 
-			mesh.GetShader()->SetFloat("time", (float)glfwGetTime());
-			mesh.Render();
+			colorShader->SetFloat("time", (float)glfwGetTime());
+			mesh.Render(*colorShader);
 		}
 
 		// glfw events and swap buffers

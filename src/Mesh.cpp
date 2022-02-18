@@ -1,15 +1,24 @@
-#include "..\include\Mesh.h"
+#include "Mesh.h"
+#include "Shader.h"
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int vertexAttributes)
 	: mVertices(vertices),
-	mIndices(indices)
+	mIndices(indices),
+	mVertexAttributes(vertexAttributes)
 {
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
-	mVertexAttributes = vertexAttributes;
 
 	SetupMesh();
+}
+
+/* When copying a mesh, we should also create new buffers so that the destructor doesn't
+ * destroy the buffer objects for both */
+Mesh::Mesh(const Mesh& other)
+	: Mesh(other.mVertices, other.mIndices, other.mVertexAttributes)
+{
+	mDefaultMaterial = other.mDefaultMaterial;
 }
 
 Mesh::~Mesh()
@@ -20,14 +29,18 @@ Mesh::~Mesh()
 	VAO = VBO = EBO = 0;
 }
 
-void Mesh::PreRender()
+std::shared_ptr<Mesh> Mesh::Copy()
 {
-	glBindVertexArray(VAO);
+	return std::shared_ptr<Mesh>(new Mesh(*this));
 }
 
-void Mesh::Render()
+void Mesh::Render(Shader& shader)
 {
-	glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, NULL);
+	shader.SetMaterial("material", mDefaultMaterial);
+
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, (void*)NULL);
+	glBindVertexArray(0);
 }
 
 void Mesh::SetupMesh()

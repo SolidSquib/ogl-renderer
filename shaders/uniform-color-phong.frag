@@ -1,10 +1,22 @@
 #version 330 core
 
+#define MAX_DIFFUSE_MAPS 1
+#define MAX_SPECULAR_MAPS 1
+#define MAX_EMISSION_MAPS 1
 struct Material
 {
-	sampler2D diffuseMap;
-	sampler2D specularMap;
-	sampler2D emissionMap;
+	sampler2D diffuseMaps[MAX_DIFFUSE_MAPS];
+	sampler2D specularMaps[MAX_SPECULAR_MAPS];
+	sampler2D emissionMaps[MAX_EMISSION_MAPS];
+
+	bool useDiffuseColor;
+	bool useSpecularValue;
+	bool useEmissionColor;
+
+	vec3 diffuseColor;
+	vec3 specularValue;
+	vec3 emissionColor;
+
 	float shininess;
 };
 
@@ -129,9 +141,17 @@ vec4 CalculateSpotLight(SpotLight light, vec4 baseColor, vec4 specularValue, vec
 
 void main()
 {
-	vec4 diffuseColor = texture(material.diffuseMap, frag_tex_coords);
-	vec4 specularAmount = texture(material.specularMap, frag_tex_coords);
-	vec4 emissionColor = texture(material.emissionMap, DistortUVOverTime(frag_tex_coords, 0.01, 5.0, 5.0, 1.5));
+	vec4 diffuseColor = material.useDiffuseColor 
+		? vec4(material.diffuseColor, 1.0)
+		: texture(material.diffuseMaps[0], frag_tex_coords);
+
+	vec4 specularAmount = material.useSpecularValue 
+		? vec4(material.specularValue, 1.0)
+		: texture(material.specularMaps[0], frag_tex_coords);
+
+	vec4 emissionColor = material.useEmissionColor 
+		? vec4(material.emissionColor, 1.0)
+		: texture(material.emissionMaps[0], DistortUVOverTime(frag_tex_coords, 0.01, 5.0, 5.0, 1.5));
 	
 	vec4 emission = vec4(0.0);
 	if (specularAmount.xyz == vec3(0.0))

@@ -139,35 +139,66 @@ void Shader::SetMatrix4(const std::string& name, glm::mat4 matrix) const
 	glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-void Shader::SetTexture(std::shared_ptr<Texture> texture, unsigned int index)
-{
-	int existingIndex = GetTextureMapIndex(index);
-	if (existingIndex >= 0)
-	{
-		mTextures[existingIndex].texture = texture;
-	}
-	else if (texture.get())
-	{
-		mTextures.push_back({ index, texture });
-	}
-
-	unsigned int useTexture = GL_TEXTURE0 + index;
-	glActiveTexture(useTexture);
-	glBindTexture(GL_TEXTURE_2D, texture.get() ? texture->GetID() : 0);
-}
-
 void Shader::SetMaterial(const std::string& name, const Material& material)
 {
-	SetTexture(material.diffuseMap, 0);
-	SetTexture(material.specularMap, 1);
-	SetTexture(material.emissionMap, 2);
+	int numTexturesMapped = 0;
+	int numDiffuse = 0, numSpecular = 0, numEmission = 0;
+	bool diffuseFound = false, specularFound = false, emissionFound = false;
 
-	SetInt(name + ".diffuseMap", 0);
-	SetInt(name + ".specularMap", 1);
-	SetInt(name + ".emissionMap", 2);
-	SetVector3(name + ".ambient", glm::vec3(material.ambientColor));
-	SetVector3(name + ".diffuse", glm::vec3(material.diffuseColor));
-	SetVector3(name + ".specular", glm::vec3(material.specularColor));
+	auto GetShaderParameterName = [](unsigned int type) -> std::string {
+		switch (type)
+		{		
+		case Texture::TEX_SPECULAR: return "material.specularMaps";
+		case Texture::TEX_EMISSION: return "material.emissionMaps";
+		case Texture::TEX_NORMAL: return "material.normalMaps";
+		case Texture::TEX_DIFFUSE: 
+		default: 
+			return "material.diffuseMaps";
+		}
+	};
+
+	auto SetFlagForType = [&](unsigned int type) {
+		switch (type)
+		{
+		case Texture::TEX_DIFFUSE: diffuseFound = true; return;
+		case Texture::TEX_SPECULAR: specularFound = true; return;
+		case Texture::TEX_EMISSION: emissionFound = true; return;
+		default: return;
+		}
+	};
+		
+	auto GetCountForType = [&](unsigned int type) -> int& {
+		switch (type)
+		{		
+		case Texture::TEX_SPECULAR: return numSpecular;
+		case Texture::TEX_EMISSION: return numEmission;
+		case Texture::TEX_DIFFUSE: 
+		default: 
+			return numDiffuse;
+		}
+	};
+
+	for (unsigned int i = 0; i < material.textures.size(); ++i)
+	{
+		const std::shared_ptr<Texture>& texture = material.textures[i];
+		if (texture)
+		{
+			glActiveTexture(GL_TEXTURE0 + numTexturesMapped);
+			SetInt(GetShaderParameterName(texture->GetType()) + "[" + std::to_string(GetCountForType(texture->GetType())++) + "]", numTexturesMapped++);
+			glBindTexture(GL_TEXTURE_2D, texture->GetID());
+			SetFlagForType(texture->GetType());
+		}
+	}
+
+	SetBool("material.useDiffuseColor", !diffuseFound);
+	SetBool("material.useSpecularValue", !specularFound);
+	SetBool("material.useEmissionColor", !emissionFound);
+
+	glActiveTexture(GL_TEXTURE0);
+
+	SetVector3(name + ".diffuseColor", glm::vec3(material.diffuseColor));
+	SetVector3(name + ".specularValue", glm::vec3(material.specularColor));
+	SetVector3(name + ".emissionColor", glm::vec3(material.emissionColor));
 	SetFloat(name + ".shininess", material.shininess);
 }
 
@@ -271,19 +302,6 @@ glm::vec4 Shader::GetVector4(const std::string& name) const
 glm::vec4 Shader::GetColor(const std::string& name) const
 {
 	return GetVector4(name);
-}
-
-int Shader::GetTextureMapIndex(unsigned int index)
-{
-	for (unsigned int i = 0; i < mTextures.size(); ++i)
-	{
-		if (mTextures[i].index == index)
-		{
-			return i;
-		}
-	}
-
-	return -1;
 }
 
 void Shader::Unbind()

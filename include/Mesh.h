@@ -30,18 +30,28 @@ enum EVertexAttributes
 class Mesh : IRenderable
 {
 public:
-	Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int vertexAttributes);
+	Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int vertexAttributes);	
 	~Mesh();
 
-	void PreRender();
-	void Render();
+	// only copy explicitly
+	std::shared_ptr<Mesh> Copy();
 
-private:	
+	void Render(class Shader& shader);
+
+	Material GetMaterial() const { return mDefaultMaterial; }
+	Material& GetMaterialRef() { return mDefaultMaterial; }
+
+	void SetMaterial(const Material& material) { mDefaultMaterial = material; }
+
+private:
 	std::vector<Vertex> mVertices;
 	std::vector<unsigned int> mIndices;
 	unsigned int mVertexAttributes;
 
+	Material mDefaultMaterial;
+
 	unsigned int VAO, VBO, EBO;
 
+	Mesh(const Mesh& other); // copy constructor
 	void SetupMesh();
 };

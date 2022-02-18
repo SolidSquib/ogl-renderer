@@ -5,17 +5,17 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
+#include <vector>
 
 #include "Texture.h"
 
 struct Material
 {
-	std::shared_ptr<Texture> diffuseMap;
-	std::shared_ptr<Texture> specularMap;
-	std::shared_ptr<Texture> emissionMap;
+	std::vector<std::shared_ptr<Texture>> textures;
 
-	glm::vec3 ambientColor;
 	glm::vec3 diffuseColor;
 	glm::vec3 specularColor;
+	glm::vec3 emissionColor;
+
 	float shininess;
 };
