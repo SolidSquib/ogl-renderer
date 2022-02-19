@@ -78,21 +78,21 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(IncludePath);$(SolutionDir)include;$(SolutionDir)dependencies\glfw\include;$(SolutionDir)dependencies\assimp\include</IncludePath>
-    <LibraryPath>$(SolutionDir)dependencies\assimp\lib\x64\Debug;$(SolutionDir)dependencies\glfw\lib\x64\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath);$(SolutionDir)include;$(SolutionDir)..\dependencies\GLFW\include;$(SolutionDir)..\dependencies\assimp\include</IncludePath>
+    <LibraryPath>$(SolutionDir)..\dependencies\assimp\lib;$(SolutionDir)..\dependencies\GLFW\lib;$(LibraryPath)</LibraryPath>
     <SourcePath>$(SourcePath);$(SolutionDir)src</SourcePath>
     <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</IntDir>
-    <ExecutablePath>$(SolutionDir)dependencies\assimp\bin\x64\Debug;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <SourcePath>$(SourcePath);$(SolutionDir)src</SourcePath>
-    <LibraryPath>$(SolutionDir)dependencies\assimp\lib\x64\Release;$(SolutionDir)dependencies\glfw\lib\x64\Release;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(IncludePath);$(SolutionDir)include;$(SolutionDir)dependencies\glfw\include;$(SolutionDir)dependencies\assimp\include</IncludePath>
+    <LibraryPath>$(SolutionDir)..\dependencies\assimp\lib;$(SolutionDir)..\dependencies\GLFW\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath);$(SolutionDir)include;$(SolutionDir)..\dependencies\GLFW\include;$(SolutionDir)..\dependencies\assimp\include</IncludePath>
     <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</IntDir>
-    <ExecutablePath>$(SolutionDir)dependencies\assimp\bin\x64\Release;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

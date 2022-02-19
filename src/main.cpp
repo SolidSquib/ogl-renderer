@@ -188,7 +188,7 @@ int main()
 	Model container(cube);
 	container.SetShader(colorShader);
 
-	Model bag("../content/backpack/backpack.obj");
+	Model bag("content/backpack/backpack.obj");
 	bag.SetShader(colorShader);
 
 	std::vector<Model> sceneMeshes = { bag };
