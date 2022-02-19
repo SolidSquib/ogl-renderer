@@ -172,13 +172,15 @@ std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	return generatedMesh;
 }
 
-std::vector<std::shared_ptr<Texture>> Model::LoadMaterialTextures(aiMaterial* material, aiTextureType type)
+std::vector<std::shared_ptr<Texture>> Model::LoadMaterialTextures(aiMaterial* material, unsigned int type)
 {
+    aiTextureType eTextureType = (aiTextureType)type;
+    
 	std::vector<std::shared_ptr<Texture>> loadedTextures;
-	for (unsigned int i = 0; i < material->GetTextureCount(type); ++i)
+	for (unsigned int i = 0; i < material->GetTextureCount(eTextureType); ++i)
 	{
 		aiString texturePath;
-		material->GetTexture(type, i, &texturePath);
+		material->GetTexture(eTextureType, i, &texturePath);
 		
 		if (std::shared_ptr<Texture> texture = TextureManager::Get().RequestTexture(texturePath.C_Str()))
 		{
@@ -199,7 +201,9 @@ std::vector<std::shared_ptr<Texture>> Model::LoadMaterialTextures(aiMaterial* ma
 			case aiTextureType_EMISSIVE:
 				TextureManager::Get().SetTextureType(texture, Texture::TEX_EMISSION);
 				break;
-			}
+            default:
+                break;
+            }
 
 			loadedTextures.push_back(texture);
 		}		

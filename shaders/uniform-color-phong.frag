@@ -73,7 +73,7 @@ uniform float time;
 
 out vec4 fragColor;
 
-vec2 DistortUVOverTime(vec2 uv, float amplitude, float xfrequency, float yfrequency, float xydependency = 0.0, float yxdependency = 0.0)
+vec2 DistortUVOverTime(vec2 uv, float amplitude, float xfrequency, float yfrequency, float xydependency, float yxdependency)
 {
 	float x = sin(xfrequency * uv.x + (xydependency * yfrequency * uv.y) + time) * amplitude;
 	float y = sin(yfrequency * uv.y + (yxdependency * xfrequency * uv.x) + time) * amplitude;
@@ -151,7 +151,7 @@ void main()
 
 	vec4 emissionColor = material.useEmissionColor 
 		? vec4(material.emissionColor, 1.0)
-		: texture(material.emissionMaps[0], DistortUVOverTime(frag_tex_coords, 0.01, 5.0, 5.0, 1.5));
+		: texture(material.emissionMaps[0], DistortUVOverTime(frag_tex_coords, 0.01, 5.0, 5.0, 1.5, 0.0));
 	
 	vec4 emission = vec4(0.0);
 	if (specularAmount.xyz == vec3(0.0))

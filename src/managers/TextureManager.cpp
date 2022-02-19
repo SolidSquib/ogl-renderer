@@ -1,4 +1,4 @@
-#include "..\..\include\managers\TextureManager.h"
+#include "managers/TextureManager.h"
 
 std::unique_ptr<TextureManager> TextureManager::mManager;
 
@@ -14,7 +14,7 @@ TextureManager& TextureManager::Get()
 
 std::shared_ptr<Texture> TextureManager::FromFile(const std::string& path, bool flipVertically)
 {
-	if (mLoadedTextures.contains(path))
+	if (mLoadedTextures.count(path) > 0)
 	{
 		std::cout << "WARNING::TEXTURE_MANAGER: " << path << " already loaded." << std::endl;
 		return mLoadedTextures[path];
@@ -74,7 +74,7 @@ std::shared_ptr<Texture> TextureManager::FromFile(const std::string& path, bool 
 
 	stbi_image_free(data);
 
-	if (mLoadedTextures.contains(path))
+	if (mLoadedTextures.count(path) > 0)
 	{
 		return mLoadedTextures[path];
 	}
@@ -84,7 +84,7 @@ std::shared_ptr<Texture> TextureManager::FromFile(const std::string& path, bool 
 
 std::shared_ptr<Texture> TextureManager::RequestTexture(const std::string& path)
 {
-	if (!mLoadedTextures.contains(path))
+	if (mLoadedTextures.count(path) <= 0)
 	{
 		return FromFile(path, false);
 	}
