@@ -159,7 +159,7 @@ int main()
 	pointLight.quadratic = 0.032f;
 
 	DirectionalLight directionalLight;
-	directionalLight.direction = glm::normalize(glm::vec3(-0.2f, -1.0f, -0.3f));
+	directionalLight.direction = glm::normalize(glm::vec3(-1.0f, -0.5f, -1.0f));
 	directionalLight.ambient = glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f;
 	directionalLight.diffuse = glm::vec3(1.0f, 1.0f, 1.0f) * 0.5f;
 	directionalLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -188,17 +188,15 @@ int main()
 	Model container(cube);
 	container.SetShader(colorShader);
 
-	std::vector<Model> sceneMeshes;
+	Model bag("../content/backpack/backpack.obj");
+	bag.SetShader(colorShader);
+
+	std::vector<Model> sceneMeshes = { bag };
 		
 	std::vector<PointLight*> scenePointLights = {
 		&pointLight,
 		&greenLight
 	};
-
-	for (unsigned int i = 0; i < 10; ++i)
-	{
-		sceneMeshes.push_back(container.SetPosition(cubePositions[i]));
-	}
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -218,13 +216,12 @@ int main()
 				
 		for (auto& mesh : sceneMeshes)
 		{
-			mesh.SetRotation(mesh.GetRotation() + deltaTime * 0.2f);
 			colorShader->SetMatrix4("view", mainCamera.GetViewMatrix());
 			colorShader->SetMatrix4("projection", projection);
 
 			// lights
 			DirectionalLight lightCopy = directionalLight;
-			lightCopy.direction = glm::transpose(glm::inverse(mainCamera.GetViewMatrix())) * glm::vec4(directionalLight.direction, 0.0f);
+			lightCopy.direction = mainCamera.GetViewMatrix() * glm::vec4(directionalLight.direction, 0.0f);
 			colorShader->SetDirectionalLight("directionalLight", lightCopy, 0);
 
 			SpotLight spotLightCopy = spotLight;

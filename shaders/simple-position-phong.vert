@@ -21,6 +21,6 @@ void main()
 	gl_Position = projection * viewPosition;
 
 	// should not run these operations on the GPU, it's very innefficient
-	frag_normal = mat3(transpose(inverse(view * model))) * inNormal;
+	frag_normal = mat3(view) * mat3(transpose(inverse(model))) * inNormal;
 	frag_tex_coords = inUV;
 }

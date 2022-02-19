@@ -3,15 +3,18 @@
 #define MAX_DIFFUSE_MAPS 1
 #define MAX_SPECULAR_MAPS 1
 #define MAX_EMISSION_MAPS 1
+#define MAX_NORMAL_MAPS 1
 struct Material
 {
 	sampler2D diffuseMaps[MAX_DIFFUSE_MAPS];
 	sampler2D specularMaps[MAX_SPECULAR_MAPS];
 	sampler2D emissionMaps[MAX_EMISSION_MAPS];
+	sampler2D normalMaps[MAX_NORMAL_MAPS];
 
 	bool useDiffuseColor;
 	bool useSpecularValue;
 	bool useEmissionColor;
+	bool useVertexNormals;
 
 	vec3 diffuseColor;
 	vec3 specularValue;
@@ -82,15 +85,15 @@ vec2 DistortUVOverTime(vec2 uv, float amplitude, float xfrequency, float yfreque
 
 vec4 CalculateDirectionalLight(DirectionalLight light, vec4 baseColor, vec4 specularValue, vec4 normal, vec4 viewDirection)
 {
-	vec4 lightDir = viewDirection; //vec4(normalize(light.direction), 0.0);
-	vec4 reflectDir = reflect(lightDir, normal);
+	vec4 lightDir = vec4(normalize(light.direction), 0.0);
+	vec4 reflectDir = normalize(reflect(lightDir, normal));
 
 	vec4 ambient = vec4(light.ambient, 1.0) * baseColor;
 
 	float diffuseFactor = max(dot(normal, -lightDir), 0.0);
 	vec4 diffuse = baseColor * vec4(light.diffuse, 1.0) * diffuseFactor;
 
-	float specularFactor = pow(max(dot(viewDirection, -reflectDir), 0.0), material.shininess);
+	float specularFactor = max(pow(dot(viewDirection, -reflectDir), max(material.shininess, 0.1)), 0.0);
 	vec4 specular = specularValue * vec4(light.specular, 1.0) * specularFactor;
 	
 	return max(ambient + diffuse + specular, 0.0);
@@ -109,7 +112,7 @@ vec4 CalculatePointLight(PointLight light, vec4 baseColor, vec4 specularValue, v
 	float diffuseFactor = max(dot(normal, -lightDir), 0.0);
 	vec4 diffuse = baseColor * vec4(light.diffuse, 1.0) * diffuseFactor * attenuationFactor;
 
-	float specularFactor = pow(max(dot(viewDirection, -reflectDir), 0.0), material.shininess);
+	float specularFactor = max(pow(dot(viewDirection, -reflectDir), max(material.shininess, 0.1)), 0.0);
 	vec4 specular = specularValue * vec4(light.specular, 1.0) * specularFactor * attenuationFactor;
 	
 	return max(ambient + diffuse + specular, 0.0);
@@ -133,7 +136,7 @@ vec4 CalculateSpotLight(SpotLight light, vec4 baseColor, vec4 specularValue, vec
 	float diffuseFactor = max(dot(normal, -lightDir), 0.0);
 	vec4 diffuse = baseColor * vec4(light.diffuse, 1.0) * diffuseFactor * attenuationFactor * intensity;
 
-	float specularFactor = pow(max(dot(viewDirection, -reflectDir), 0.0), material.shininess);
+	float specularFactor = max(pow(dot(viewDirection, -reflectDir), max(material.shininess, 0.1)), 0.0);
 	vec4 specular = specularValue * vec4(light.specular, 1.0) * specularFactor * attenuationFactor * intensity;
 	
 	return max(ambient + diffuse + specular, 0.0);
@@ -153,13 +156,14 @@ void main()
 		? vec4(material.emissionColor, 1.0)
 		: texture(material.emissionMaps[0], DistortUVOverTime(frag_tex_coords, 0.01, 5.0, 5.0, 1.5));
 	
+	vec4 normal = vec4(normalize(frag_normal), 0.0);
+
 	vec4 emission = vec4(0.0);
 	if (specularAmount.xyz == vec3(0.0))
 	{
 		emission = emissionColor;
 	}
-
-	vec4 normal = vec4(normalize(frag_normal), 0.0);
+		
 	vec4 viewDirection = vec4(0.0, 0.0, -1.0, 0.0);
 	vec4 position = vec4(frag_position, 1.0);
 

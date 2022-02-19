@@ -142,8 +142,8 @@ void Shader::SetMatrix4(const std::string& name, glm::mat4 matrix) const
 void Shader::SetMaterial(const std::string& name, const Material& material)
 {
 	int numTexturesMapped = 0;
-	int numDiffuse = 0, numSpecular = 0, numEmission = 0;
-	bool diffuseFound = false, specularFound = false, emissionFound = false;
+	int numDiffuse = 0, numSpecular = 0, numEmission = 0, numNormal = 0;
+	bool diffuseFound = false, specularFound = false, emissionFound = false, normalFound = false;
 
 	auto GetShaderParameterName = [](unsigned int type) -> std::string {
 		switch (type)
@@ -163,6 +163,7 @@ void Shader::SetMaterial(const std::string& name, const Material& material)
 		case Texture::TEX_DIFFUSE: diffuseFound = true; return;
 		case Texture::TEX_SPECULAR: specularFound = true; return;
 		case Texture::TEX_EMISSION: emissionFound = true; return;
+		case Texture::TEX_NORMAL: normalFound = true; return;
 		default: return;
 		}
 	};
@@ -172,6 +173,7 @@ void Shader::SetMaterial(const std::string& name, const Material& material)
 		{		
 		case Texture::TEX_SPECULAR: return numSpecular;
 		case Texture::TEX_EMISSION: return numEmission;
+		case Texture::TEX_NORMAL: return numNormal;
 		case Texture::TEX_DIFFUSE: 
 		default: 
 			return numDiffuse;
@@ -193,13 +195,14 @@ void Shader::SetMaterial(const std::string& name, const Material& material)
 	SetBool("material.useDiffuseColor", !diffuseFound);
 	SetBool("material.useSpecularValue", !specularFound);
 	SetBool("material.useEmissionColor", !emissionFound);
+	SetBool("material.useVertexNormals", !normalFound);
 
 	glActiveTexture(GL_TEXTURE0);
 
 	SetVector3(name + ".diffuseColor", glm::vec3(material.diffuseColor));
 	SetVector3(name + ".specularValue", glm::vec3(material.specularColor));
 	SetVector3(name + ".emissionColor", glm::vec3(material.emissionColor));
-	SetFloat(name + ".shininess", material.shininess);
+	SetFloat(name + ".shininess", 32.0f);
 }
 
 void Shader::SetDirectionalLight(const std::string& name, const DirectionalLight& light, unsigned int lightIndex)

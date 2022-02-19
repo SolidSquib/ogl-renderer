@@ -86,7 +86,7 @@ std::shared_ptr<Texture> TextureManager::RequestTexture(const std::string& path)
 {
 	if (!mLoadedTextures.contains(path))
 	{
-		return FromFile(path, false);
+		return FromFile(path, true);
 	}
 
 	return mLoadedTextures[path];

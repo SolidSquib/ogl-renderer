@@ -49,7 +49,8 @@ Model& Model::SetTransform(const glm::vec3& position, const glm::vec3& rotation,
 
 void Model::Render(Shader& shader)
 {
-	mShader->Use();
+	Shader& useShader = mShader ? *mShader : shader;
+	useShader.Use();
 	for (auto& mesh : mMeshes)
 	{
 		if (mesh.get())
@@ -61,12 +62,11 @@ void Model::Render(Shader& shader)
 			meshTransform = glm::rotate(meshTransform, mRotation.x, glm::vec3(0.0f, 0.0f, -1.0f)); // roll
 			meshTransform = glm::rotate(meshTransform, mRotation.y, glm::vec3(1.0f, 0.0f, 0.0f));  // pitch
 			meshTransform = glm::rotate(meshTransform, mRotation.z, glm::vec3(0.0f, 1.0f, 0.0f));  // yaw
-			mShader->SetMatrix4("model", meshTransform);
+			useShader.SetMatrix4("model", meshTransform);
 
-			mesh->Render(shader);
+			mesh->Render(useShader);
 		}
-	}
-		
+	}	
 }
 
 void Model::LoadModel(const std::string& path)
@@ -79,29 +79,29 @@ void Model::LoadModel(const std::string& path)
 		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
 		return;
 	}
+	std::string directory = path.substr(0, path.find_last_of('/')) + '/';
 
-	ProcessNode(scene->mRootNode, scene);
+	ProcessNode(scene->mRootNode, scene, directory);
 }
 
-void Model::ProcessNode(aiNode* node, const aiScene* scene)
+void Model::ProcessNode(aiNode* node, const aiScene* scene, const std::string& directory)
 {
 	for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 	{
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		mMeshes.push_back(ProcessMesh(mesh, scene));
+		mMeshes.push_back(ProcessMesh(mesh, scene, directory));
 	}
 
 	for (unsigned int i = 0; i < node->mNumChildren; ++i)
 	{
-		ProcessNode(node->mChildren[i], scene);
+		ProcessNode(node->mChildren[i], scene, directory);
 	}
 }
 
-std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene, const std::string& directory)
 {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
-	std::vector<std::shared_ptr<Texture>> textures;
 	unsigned int attributeFlags = 0;
 	Material mat;
 		
@@ -119,8 +119,8 @@ std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		if (mesh->HasVertexColors(0))
 		{
 			attributeFlags |= EVA_COLOR;
-			const aiVector3D& color = mesh->mNormals[i];
-			vertex.col = glm::vec3(color.x, color.y, color.z);
+			const aiColor4D* color = mesh->mColors[i];
+			vertex.col = glm::vec3(color->r, color->g, color->b);
 		}
 
 		if (mesh->HasNormals())
@@ -157,22 +157,27 @@ std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		auto diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE);
-		mat.textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		auto diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, directory);
+		mat.textures.insert(mat.textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		
+		auto specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, directory);
+		mat.textures.insert(mat.textures.end(), specularMaps.begin(), specularMaps.end());
+		
+		auto emissiveMaps = LoadMaterialTextures(material, aiTextureType_EMISSIVE, directory);
+		mat.textures.insert(mat.textures.end(), emissiveMaps.begin(), emissiveMaps.end());
 
-		auto specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR);
-		mat.textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-
-		auto emissiveMaps = LoadMaterialTextures(material, aiTextureType_EMISSIVE);
-		mat.textures.insert(textures.end(), emissiveMaps.begin(), emissiveMaps.end());
+		auto normalMaps = LoadMaterialTextures(material, aiTextureType_NORMALS, directory);
+		mat.textures.insert(mat.textures.end(), normalMaps.begin(), normalMaps.end());
 	}
 
 	std::shared_ptr<Mesh> generatedMesh(new Mesh(vertices, indices, attributeFlags));
+	mat.shininess = 1.0f;
+	generatedMesh->SetMaterial(mat);
 
 	return generatedMesh;
 }
 
-std::vector<std::shared_ptr<Texture>> Model::LoadMaterialTextures(aiMaterial* material, aiTextureType type)
+std::vector<std::shared_ptr<Texture>> Model::LoadMaterialTextures(aiMaterial* material, aiTextureType type, const std::string& directory)
 {
 	std::vector<std::shared_ptr<Texture>> loadedTextures;
 	for (unsigned int i = 0; i < material->GetTextureCount(type); ++i)
@@ -180,7 +185,7 @@ std::vector<std::shared_ptr<Texture>> Model::LoadMaterialTextures(aiMaterial* ma
 		aiString texturePath;
 		material->GetTexture(type, i, &texturePath);
 		
-		if (std::shared_ptr<Texture> texture = TextureManager::Get().RequestTexture(texturePath.C_Str()))
+		if (std::shared_ptr<Texture> texture = TextureManager::Get().RequestTexture(directory + texturePath.C_Str()))
 		{
 			switch (type)
 			{

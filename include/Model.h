@@ -38,7 +38,7 @@ private:
 	glm::vec3 mScale = glm::vec3(1.0f, 1.0f, 1.0f);
 
 	void LoadModel(const std::string& path);
-	void ProcessNode(aiNode* node, const aiScene* scene);
-	std::shared_ptr<Mesh> ProcessMesh(aiMesh* mesh, const aiScene* scene);
-	std::vector<std::shared_ptr<Texture>> LoadMaterialTextures(aiMaterial* material, aiTextureType type);
+	void ProcessNode(aiNode* node, const aiScene* scene, const std::string& directory);
+	std::shared_ptr<Mesh> ProcessMesh(aiMesh* mesh, const aiScene* scene, const std::string& directory);
+	std::vector<std::shared_ptr<Texture>> LoadMaterialTextures(aiMaterial* material, aiTextureType type, const std::string& directory);
 };
