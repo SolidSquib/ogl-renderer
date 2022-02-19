@@ -39,7 +39,7 @@ void Mesh::Render(Shader& shader)
 	shader.SetMaterial("material", mDefaultMaterial);
 
 	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, (void*)NULL);
+	glDrawElements(GL_TRIANGLES, static_cast<int>(mIndices.size()), GL_UNSIGNED_INT, (void*)NULL);
 	glBindVertexArray(0);
 }
 

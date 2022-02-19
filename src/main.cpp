@@ -125,18 +125,18 @@ int main()
 	glfwSetScrollCallback(window, scrollCallback);
 
 	// textures
-	std::shared_ptr<Texture> containerDiffuse = TextureManager::Get().RequestTexture("../content/textures/container2.png");
+	std::shared_ptr<Texture> containerDiffuse = TextureManager::Get().RequestTexture("content/textures/container2.png");
 	TextureManager::Get().SetTextureType(containerDiffuse, Texture::TEX_DIFFUSE);
 
-	std::shared_ptr<Texture> containerSpecular = TextureManager::Get().RequestTexture("../content/textures/container2_specular.png");
+	std::shared_ptr<Texture> containerSpecular = TextureManager::Get().RequestTexture("content/textures/container2_specular.png");
 	TextureManager::Get().SetTextureType(containerSpecular, Texture::TEX_SPECULAR);
 
-	std::shared_ptr<Texture> matrix = TextureManager::Get().RequestTexture("../content/textures/matrix.jpg");
+	std::shared_ptr<Texture> matrix = TextureManager::Get().RequestTexture("content/textures/matrix.jpg");
 	TextureManager::Get().SetTextureType(matrix, Texture::TEX_EMISSION);
 
 	// shaders
-	std::shared_ptr<Shader> lightShader(new Shader("../shaders/simple-position-color.vert", "../shaders/uniform-color-unlit.frag"));
-	std::shared_ptr<Shader> colorShader(new Shader("../shaders/simple-position-phong.vert", "../shaders/uniform-color-phong.frag"));
+	std::shared_ptr<Shader> lightShader(new Shader("shaders/simple-position-color.vert", "shaders/uniform-color-unlit.frag"));
+	std::shared_ptr<Shader> colorShader(new Shader("shaders/simple-position-phong.vert", "shaders/uniform-color-phong.frag"));
 
 	// materials 
 	Material containerMaterial;

@@ -216,48 +216,27 @@ void Shader::SetDirectionalLight(const std::string& name, const DirectionalLight
 
 void Shader::SetPointLight(const std::string& name, const PointLight& light, unsigned int lightIndex)
 {
-	char buffer[512];
-	const char* formatString = "%s[%u].%s";
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "position");	
-	SetVector3(buffer, light.position);
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "ambient");
-	SetVector3(buffer, glm::vec3(light.ambient));
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "diffuse");
-	SetVector3(buffer, glm::vec3(light.diffuse));
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "specular");
-	SetVector3(buffer, glm::vec3(light.specular));
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "constant");
-	SetFloat(buffer, light.constant);
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "linear");
-	SetFloat(buffer, light.linear);
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "quadratic");
-	SetFloat(buffer, light.quadratic);
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].position", light.position);
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].ambient", glm::vec3(light.ambient));
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].diffuse", glm::vec3(light.diffuse));
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].specular", glm::vec3(light.specular));
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].constant", light.constant);
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].linear", light.linear);
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].quadratic", light.quadratic);
 }
 
 void Shader::SetSpotLight(const std::string& name, const SpotLight& light, unsigned int lightIndex)
 {
-	char buffer[512];
-	const char* formatString = "%s[%u].%s";
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "position");
-	SetVector3(buffer, light.position);
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "direction");
-	SetVector3(buffer, light.direction);
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "ambient");
-	SetVector3(buffer, glm::vec3(light.ambient));
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "diffuse");
-	SetVector3(buffer, glm::vec3(light.diffuse));
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "specular");
-	SetVector3(buffer, glm::vec3(light.specular));
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "constant");
-	SetFloat(buffer, light.constant);
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "linear");
-	SetFloat(buffer, light.linear);
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "quadratic");
-	SetFloat(buffer, light.quadratic);
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "innerCutoff");
-	SetFloat(buffer, light.innerCutoff);
-	sprintf_s(buffer, formatString, name.c_str(), lightIndex, "outerCutoff");
-	SetFloat(buffer, light.outerCutoff);
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].position", light.position);
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].direction", light.direction);
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].ambient", glm::vec3(light.ambient));
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].diffuse", glm::vec3(light.diffuse));
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].specular", glm::vec3(light.specular));
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].constant", light.constant);
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].linear", light.linear);
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].quadratic", light.quadratic);
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].innerCutoff", light.innerCutoff);
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].outerCutoff", light.outerCutoff);
 }
 
 bool Shader::GetBool(const std::string& name) const
