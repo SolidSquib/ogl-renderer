@@ -45,6 +45,9 @@
     <ClCompile Include="src\managers\TextureManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\KHR\khrplatform.h">
@@ -929,6 +932,9 @@
     <ClInclude Include="include\managers\TextureManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\simple-color.frag" />
@@ -1349,5 +1355,6 @@
     <None Include="shaders\simple-position-phong.vert" />
     <None Include="shaders\uniform-color-phong.frag" />
     <None Include="shaders\uniform-color-unlit.frag" />
+    <None Include="shaders\outline.frag" />
   </ItemGroup>
 </Project>

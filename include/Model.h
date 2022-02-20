@@ -14,11 +14,11 @@ public:
 	Model(std::shared_ptr<Mesh> mesh);
 	Model(const char* loadPath);
 
-	Model& SetShader(std::shared_ptr<Shader> shader);
-	Model& SetPosition(const glm::vec3& position);
-	Model& SetRotation(const glm::vec3& rotation);
-	Model& SetScale(const glm::vec3& scale);
-	Model& SetTransform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
+	void SetShader(std::shared_ptr<Shader> shader);
+	void SetPosition(const glm::vec3& position);
+	void SetRotation(const glm::vec3& rotation);
+	void SetScale(const glm::vec3& scale);
+	void SetTransform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
 	
 	std::shared_ptr<Mesh> GetMesh(unsigned int index) const { return mMeshes.size() < index && index >= 0 ? mMeshes[index] : nullptr; }
 	std::shared_ptr<Shader> GetShader() const { return mShader; }
@@ -26,7 +26,7 @@ public:
 	glm::vec3 GetRotation() const { return mRotation; }
 	glm::vec3 GetScale() const { return mScale; }
 
-	virtual void Render(Shader& shader);
+	virtual void Render(Shader* shader);
 
 private:
 	std::vector<std::shared_ptr<Mesh>> mMeshes;

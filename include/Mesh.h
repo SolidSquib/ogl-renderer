@@ -31,12 +31,15 @@ class Mesh : IRenderable
 {
 public:
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, unsigned int vertexAttributes);	
+	Mesh(const std::vector<Vertex>& vertices, unsigned int vertexAttributes);
+	Mesh(const float* vertices, unsigned int numVertices, const std::vector<unsigned int>& indices, unsigned int vertexAttributes);
+	Mesh(const float* vertices, unsigned int numVertices, unsigned int vertexAttributes);
 	~Mesh();
 
 	// only copy explicitly
 	std::shared_ptr<Mesh> Copy();
 
-	void Render(class Shader& shader);
+	void Render(class Shader* shader);
 
 	Material GetMaterial() const { return mDefaultMaterial; }
 	Material& GetMaterialRef() { return mDefaultMaterial; }
@@ -47,6 +50,7 @@ private:
 	std::vector<Vertex> mVertices;
 	std::vector<unsigned int> mIndices;
 	unsigned int mVertexAttributes;
+	bool mUseEBO = true;
 
 	Material mDefaultMaterial;
 
@@ -54,4 +58,5 @@ private:
 
 	Mesh(const Mesh& other); // copy constructor
 	void SetupMesh();
+	std::vector<Vertex> ProcessFloatArray(const float* vertices, unsigned int numVertices, unsigned int vertexAttributes);
 };

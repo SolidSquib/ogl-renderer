@@ -46,7 +46,8 @@ struct DirectionalLight
 	vec3 diffuse;
 	vec3 specular;
 }; 
-uniform DirectionalLight directionalLight;
+#define NUM_DIRECTIONAL_LIGHTS 4
+uniform DirectionalLight directionalLights[NUM_DIRECTIONAL_LIGHTS];
 
 struct SpotLight
 {
@@ -167,11 +168,18 @@ void main()
 	vec4 viewDirection = vec4(0.0, 0.0, -1.0, 0.0);
 	vec4 position = vec4(frag_position, 1.0);
 
-	vec4 resultColor = CalculateDirectionalLight(directionalLight, diffuseColor, specularAmount, normal, viewDirection);
+	vec4 resultColor = vec4(0.0);
+
+	for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
+	{
+		resultColor += CalculateDirectionalLight(directionalLights[i], diffuseColor, specularAmount, normal, viewDirection);
+	}
+
 	for (int i = 0; i < NUM_POINT_LIGHTS; ++i)
 	{
 		resultColor += CalculatePointLight(pointLights[i], diffuseColor, specularAmount, position, normal, viewDirection);
 	}
+
 	for (int i = 0; i < NUM_SPOT_LIGHTS; ++i)
 	{
 		resultColor += CalculateSpotLight(spotLights[i], diffuseColor, specularAmount, position, normal, viewDirection);

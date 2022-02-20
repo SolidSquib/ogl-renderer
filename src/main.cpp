@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "Model.h"
 #include "Light.h"
+#include "Scene.h"
 
 void framebuffer_size_changed_callback(GLFWwindow* window, int width, int height);
 void mouseCallback(GLFWwindow* window, double xPos, double yPos);
@@ -15,6 +16,7 @@ void scrollCallback(GLFWwindow* window, double xOffset, double yOffset);
 void ProcessInput(GLFWwindow* window);
 
 const std::vector<Vertex> cube_vertices = {
+	// back face
 	{ { -0.5f, -0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, -1.0f },		{ 0.0f, 0.0f } },
 	{ { 0.5f, -0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, -1.0f },		{ 1.0f, 0.0f } },
 	{ { 0.5f, 0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, -1.0f },		{ 1.0f, 1.0f } },
@@ -22,6 +24,7 @@ const std::vector<Vertex> cube_vertices = {
 	{ { -0.5f, 0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, -1.0f },		{ 0.0f, 1.0f } },
 	{ { -0.5f, -0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, -1.0f },		{ 0.0f, 0.0f } },
 
+	// front face
 	{ { -0.5f, -0.5f, 0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, 1.0f },		{ 0.0f, 0.0f } },
 	{ { 0.5f, -0.5f, 0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, 1.0f },		{ 1.0f, 0.0f } },
 	{ { 0.5f, 0.5f, 0.5f },		{ 1.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, 1.0f },		{ 1.0f, 1.0f } },
@@ -29,6 +32,7 @@ const std::vector<Vertex> cube_vertices = {
 	{ { -0.5f, 0.5f, 0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, 1.0f },		{ 0.0f, 1.0f } },
 	{ { -0.5f, -0.5f, 0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, 0.0f, 1.0f },		{ 0.0f, 0.0f } },
 	 
+	// left face
 	{ { -0.5f, 0.5f, 0.5f },	{ 1.0f, 1.0f, 1.0f },	{ -1.0f, 0.0f, 0.0f },		{ 0.0f, 0.0f } },
 	{ { -0.5f, 0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ -1.0f, 0.0f, 0.0f },		{ 1.0f, 0.0f } },
 	{ { -0.5f, -0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ -1.0f, 0.0f, 0.0f },		{ 1.0f, 1.0f } },
@@ -36,6 +40,7 @@ const std::vector<Vertex> cube_vertices = {
 	{ { -0.5f, -0.5f, 0.5f },	{ 1.0f, 1.0f, 1.0f },	{ -1.0f, 0.0f, 0.0f },		{ 0.0f, 1.0f } },
 	{ { -0.5f, 0.5f, 0.5f },	{ 1.0f, 1.0f, 1.0f },	{ -1.0f, 0.0f, 0.0f },		{ 0.0f, 0.0f } },
 	 
+	// right face
 	{ { 0.5f, 0.5f, 0.5f },		{ 1.0f, 1.0f, 1.0f },	{ 1.0f, 0.0f, 0.0f },		{ 0.0f, 0.0f } },
 	{ { 0.5f, 0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 1.0f, 0.0f, 0.0f },		{ 1.0f, 0.0f } },
 	{ { 0.5f, -0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 1.0f, 0.0f, 0.0f },		{ 1.0f, 1.0f } },
@@ -43,6 +48,7 @@ const std::vector<Vertex> cube_vertices = {
 	{ { 0.5f, -0.5f, 0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 1.0f, 0.0f, 0.0f },		{ 0.0f, 1.0f } },
 	{ { 0.5f, 0.5f, 0.5f },		{ 1.0f, 1.0f, 1.0f },	{ 1.0f, 0.0f, 0.0f },		{ 0.0f, 0.0f } },
 	
+	// bottom face
 	{ { -0.5f, -0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, -1.0f, 0.0f },		{ 0.0f, 0.0f } },
 	{ { 0.5f, -0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, -1.0f, 0.0f },		{ 1.0f, 0.0f } },
 	{ { 0.5f, -0.5f, 0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, -1.0f, 0.0f },		{ 1.0f, 1.0f } },
@@ -50,6 +56,7 @@ const std::vector<Vertex> cube_vertices = {
 	{ { -0.5f, -0.5f, 0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, -1.0f, 0.0f },		{ 0.0f, 1.0f } },
 	{ { -0.5f, -0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, -1.0f, 0.0f },		{ 0.0f, 0.0f } },
 	
+	// top face
 	{ { -0.5f, 0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, 1.0f, 0.0f },		{ 0.0f, 0.0f } },
 	{ { 0.5f, 0.5f, -0.5f },	{ 1.0f, 1.0f, 1.0f },	{ 0.0f, 1.0f, 0.0f },		{ 1.0f, 0.0f } },
 	{ { 0.5f, 0.5f, 0.5f },		{ 1.0f, 1.0f, 1.0f },	{ 0.0f, 1.0f, 0.0f },		{ 1.0f, 1.0f } },
@@ -59,31 +66,44 @@ const std::vector<Vertex> cube_vertices = {
 };
 
 const std::vector<unsigned int> cube_indices = {
-	0, 1, 2, 3, 4, 5,
+	// back face
+	0, 2, 1, 3, 5, 4,
+	// front face
 	6, 7, 8, 9, 10, 11,
+	// left face
 	12, 13, 14, 15, 16, 17,
-	18, 19, 20, 21, 22, 23, 
+	// right face
+	18, 20, 19, 21, 23, 22, 
+	// bottom face
 	24, 25, 26, 27, 28, 29,
-	30, 31, 32, 33, 34, 35
+	// top face
+	30, 32, 31, 33, 35, 34
 };
 
-const glm::vec3 cubePositions[] = {
-	glm::vec3(0.0f,  0.0f,  0.0f),
-	glm::vec3(2.0f,  5.0f, -15.0f),
-	glm::vec3(-1.5f, -2.2f, -2.5f),
-	glm::vec3(-3.8f, -2.0f, -12.3f),
-	glm::vec3(2.4f, -0.4f, -3.5f),
-	glm::vec3(-1.7f,  3.0f, -7.5f),
-	glm::vec3(1.3f, -2.0f, -2.5f),
-	glm::vec3(1.5f,  2.0f, -2.5f),
-	glm::vec3(1.5f,  0.2f, -1.5f),
-	glm::vec3(-1.3f,  1.0f, -1.5f)
+float planeVertices[] = {
+	// positions          // texture Coords 
+	 5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+	-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+	-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+
+	 5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+	-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+	 5.0f, -0.5f, -5.0f,  2.0f, 2.0f
 };
 
-Camera mainCamera(glm::vec3(0.0f, 0.0f, 3.0f));
-bool useOrthographicProjection = false;
-glm::mat4 projection(1.0);
-float fovDegrees = 45.0f;
+float transparentVertices[] = {
+	// positions         // texture Coords (swapped y coordinates because texture is flipped upside down)
+	0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+	0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
+	1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+
+	0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+	1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+	1.0f,  0.5f,  0.0f,  1.0f,  0.0f
+};
+
+Scene* gActiveScene = nullptr;
+
 float fovScrollSpeed = 5.0f;
 float deltaTime = 0.0f;
 float lastFrameTime = 0.0f;
@@ -134,9 +154,16 @@ int main()
 	std::shared_ptr<Texture> matrix = TextureManager::Get().RequestTexture("content/textures/matrix.jpg");
 	TextureManager::Get().SetTextureType(matrix, Texture::TEX_EMISSION);
 
+	std::shared_ptr<Texture> floorDiffuse = TextureManager::Get().RequestTexture("content/textures/wall.jpg");
+	TextureManager::Get().SetTextureType(floorDiffuse, Texture::TEX_DIFFUSE);
+
+	std::shared_ptr<Texture> windowDiffuse = TextureManager::Get().RequestTexture("content/textures/blending_transparent_window.png");
+	TextureManager::Get().SetTextureType(windowDiffuse, Texture::TEX_DIFFUSE);
+
 	// shaders
 	std::shared_ptr<Shader> lightShader(new Shader("shaders/simple-position-color.vert", "shaders/uniform-color-unlit.frag"));
 	std::shared_ptr<Shader> colorShader(new Shader("shaders/simple-position-phong.vert", "shaders/uniform-color-phong.frag"));
+	std::shared_ptr<Shader> outlineShader(new Shader("shaders/simple-position-phong.vert", "shaders/outline.frag"));
 
 	// materials 
 	Material containerMaterial;
@@ -144,61 +171,100 @@ int main()
 	containerMaterial.textures = { containerDiffuse, containerSpecular, matrix };
 	containerMaterial.shininess = 128.0f * 0.6f;
 
+	Material floorMaterial;
+	floorMaterial.textures = { floorDiffuse };
+
+	Material windowMaterial;
+	windowMaterial.textures = { windowDiffuse };
+
 	// meshes
 	std::shared_ptr<Mesh> cube(new Mesh(cube_vertices, cube_indices, EVA_POSITION | EVA_NORMAL | EVA_UV));
 	cube->SetMaterial(containerMaterial);
 
+	std::shared_ptr<Mesh> plane(new Mesh(planeVertices, 6, EVA_POSITION | EVA_UV));
+	plane->SetMaterial(floorMaterial);
+
+	std::shared_ptr<Mesh> windowMesh(new Mesh(transparentVertices, 6, EVA_POSITION | EVA_UV));
+	windowMesh->SetMaterial(windowMaterial);
+
 	// lights
-	PointLight pointLight;
-	pointLight.position = glm::vec3(-1.0f, 1.0f, -0.8f);
-	pointLight.ambient = glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f;
-	pointLight.diffuse = glm::vec3(1.0f, 0.5f, 0.31f);
-	pointLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	pointLight.constant = 1.0f;
-	pointLight.linear = 0.09f;
-	pointLight.quadratic = 0.032f;
+	PointLight redLight(
+		glm::vec3(-1.0f, 1.0f, -0.8f),
+		glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f,
+		glm::vec3(1.0f, 0.5f, 0.31f),
+		glm::vec3(1.0f, 1.0f, 1.0f)
+	);
 
-	DirectionalLight directionalLight;
-	directionalLight.direction = glm::normalize(glm::vec3(-1.0f, -0.5f, -1.0f));
-	directionalLight.ambient = glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f;
-	directionalLight.diffuse = glm::vec3(1.0f, 1.0f, 1.0f) * 0.5f;
-	directionalLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	DirectionalLight directionalLight(
+		glm::normalize(glm::vec3(-1.0f, -0.5f, -1.0f)),
+		glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f,
+		glm::vec3(1.0f, 1.0f, 1.0f) * 0.5f,
+		glm::vec3(1.0f, 1.0f, 1.0f)
+	);	
 
-	PointLight greenLight;
-	greenLight.position = glm::vec3(1.0f, 1.0f, -1.3f);
-	greenLight.ambient = glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f;
-	greenLight.diffuse = glm::vec3(0.0f, 1.0f, 0.21f);
-	greenLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	greenLight.constant = 1.0f;
-	greenLight.linear = 0.09f;
-	greenLight.quadratic = 0.032f;
+	PointLight greenLight(
+		glm::vec3(1.0f, 1.0f, -1.3f),
+		glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f,
+		glm::vec3(0.0f, 1.0f, 0.21f),
+		glm::vec3(1.0f, 1.0f, 1.0f)
+	);
 
-	SpotLight spotLight;
-	spotLight.position = glm::vec3(1.0f, 1.0f, -1.3f);
-	spotLight.ambient = glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f;
-	spotLight.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-	spotLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	spotLight.constant = 1.0f;
-	spotLight.linear = 0.045f;
-	spotLight.quadratic = 0.0075f;
-	spotLight.innerCutoff = glm::cos(glm::radians(12.5f));
-	spotLight.outerCutoff = glm::cos(glm::radians(17.5f));
+	SpotLight spotLight(
+		glm::vec3(0.0f, 4.0f, -1.0f),
+		glm::vec3(0.0f, -1.0f, 0.0f),
+		glm::vec3(1.0f, 1.0f, 1.0f) * 0.1f,
+		glm::vec3(1.0f, 1.0f, 1.0f),
+		glm::vec3(1.0f, 1.0f, 1.0f)
+	);
+	spotLight.SetLinearComponent(0.045f);
+	spotLight.SetQuadraticComponent(0.0075f);
 
 	// objects
 	Model container(cube);
-	container.SetShader(colorShader);
+	container.SetPosition(glm::vec3(-1.0f, 0.0f, -1.0f));
+	Model container2(cube);
+	container2.SetPosition(glm::vec3(2.0f, 0.0f, 0.0f));
 
 	Model bag("content/backpack/backpack.obj");
-	bag.SetShader(colorShader);
 
-	std::vector<Model> sceneMeshes = { bag };
-		
-	std::vector<PointLight*> scenePointLights = {
-		&pointLight,
-		&greenLight
-	};
+	Model floorPlane(plane);
+
+	Model windowModel(windowMesh);
+	windowModel.SetPosition(glm::vec3(-1.5f, 0.0f, -0.48f));
+	Model windowModel2(windowMesh);
+	windowModel2.SetPosition(glm::vec3(1.5f, 0.0f, 0.51f));
+	Model windowModel3(windowMesh);
+	windowModel3.SetPosition(glm::vec3(0.0f, 0.0f, 0.7f));
+	Model windowModel4(windowMesh);
+	windowModel4.SetPosition(glm::vec3(-0.3f, 0.0f, -2.3f));
+	Model windowModel5(windowMesh);
+	windowModel5.SetPosition(glm::vec3(0.5f, 0.0f, -0.6f));
+
+	Scene bagScene(std::shared_ptr<Camera>(new Camera(glm::vec3(0.0f, 0.0f, 3.0f))));
+	bagScene.AddActor(&bag);
+	bagScene.AddLight(&directionalLight);
+
+	Scene boxScene(std::shared_ptr<Camera>(new Camera(glm::vec3(0.0f, 0.0f, 3.0f))));
+	boxScene.AddActor(&container);
+	boxScene.AddActor(&container2);
+	boxScene.AddActor(&floorPlane);
+	boxScene.AddActor(&windowModel);
+	boxScene.AddActor(&windowModel2);
+	boxScene.AddActor(&windowModel3);
+	boxScene.AddActor(&windowModel4);
+	boxScene.AddActor(&windowModel5);
+	boxScene.AddLight(&directionalLight);
+	boxScene.AddLight(&redLight);
+	boxScene.AddLight(&spotLight);
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST);
+	glEnable(GL_CULL_FACE);
+
+	gActiveScene = &boxScene;
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+	framebuffer_size_changed_callback(window, width, height);
 
 	// start the main loop
 	while (!glfwWindowShouldClose(window))
@@ -211,33 +277,9 @@ int main()
 		ProcessInput(window);
 
 		// render 
-		glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				
-		for (auto& mesh : sceneMeshes)
+		if (gActiveScene)
 		{
-			colorShader->SetMatrix4("view", mainCamera.GetViewMatrix());
-			colorShader->SetMatrix4("projection", projection);
-
-			// lights
-			DirectionalLight lightCopy = directionalLight;
-			lightCopy.direction = mainCamera.GetViewMatrix() * glm::vec4(directionalLight.direction, 0.0f);
-			colorShader->SetDirectionalLight("directionalLight", lightCopy, 0);
-
-			SpotLight spotLightCopy = spotLight;
-			spotLightCopy.direction = glm::vec3(0.0f, 0.0f, -1.0f);
-			spotLightCopy.position = glm::vec3(0.0f, 0.0f, 0.0f);
-			colorShader->SetSpotLight("spotLights", spotLightCopy, 0);
-
-			for (int i = 0; i < scenePointLights.size(); ++i)
-			{
-				PointLight pointCopy = *scenePointLights[i];
-				pointCopy.position = mainCamera.GetViewMatrix() * glm::vec4(pointCopy.position, 1.0f);
-				colorShader->SetPointLight("pointLights", pointCopy, i);
-			}
-
-			colorShader->SetFloat("time", (float)glfwGetTime());
-			mesh.Render(*colorShader);
+			gActiveScene->Render(colorShader.get());
 		}
 
 		// glfw events and swap buffers
@@ -253,9 +295,19 @@ int main()
 void framebuffer_size_changed_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
-	projection = useOrthographicProjection
-		? glm::ortho(0.0f, (float)width, 0.0f, (float)height, 0.1f, 100.0f)
-		: glm::perspective(glm::radians(fovDegrees), (float)width / (float)height, 0.1f, 100.0f);
+	
+	if (gActiveScene)
+	{
+		auto camera = gActiveScene->GetCamera();
+		if (camera->IsOrthographic())
+		{
+			camera->SetOrtho((float)width, (float)height, camera->GetNearClip(), camera->GetFarClip());
+		}
+		else
+		{
+			camera->SetPerspective((float)width, (float)height, camera->GetFovDegrees(), camera->GetNearClip(), camera->GetFarClip());
+		}
+	}	
 }
 
 void mouseCallback(GLFWwindow* window, double xPos, double yPos)
@@ -272,7 +324,11 @@ void mouseCallback(GLFWwindow* window, double xPos, double yPos)
 	mouseX = (float)xPos;
 	mouseY = (float)yPos;
 
-	mainCamera.ProcessLookInput(deltaX, deltaY);
+	if (gActiveScene)
+	{
+		auto camera = gActiveScene->GetCamera();
+		camera->ProcessLookInput(deltaX, deltaY);
+	}
 }
 
 /// <summary>
@@ -283,16 +339,20 @@ void mouseCallback(GLFWwindow* window, double xPos, double yPos)
 /// <param name="yOffset"></param>
 void scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
 {
-	float cameraPanSpeed = mainCamera.GetPanSpeed() + (float)yOffset;
-	if (cameraPanSpeed < 1.0f)
+	if (gActiveScene)
 	{
-		cameraPanSpeed = 1.0f;
+		auto camera = gActiveScene->GetCamera();
+		float cameraPanSpeed = camera->GetPanSpeed() + (float)yOffset;
+		if (cameraPanSpeed < 1.0f)
+		{
+			cameraPanSpeed = 1.0f;
+		}
+		else if (cameraPanSpeed > 50.0f)
+		{
+			cameraPanSpeed = 50.0f;
+		}
+		camera->SetPanSpeed(cameraPanSpeed);
 	}
-	else if (cameraPanSpeed > 50.0f)
-	{
-		cameraPanSpeed = 50.0f;
-	}
-	mainCamera.SetPanSpeed(cameraPanSpeed);
 }
 
 /// <summary>
@@ -317,23 +377,27 @@ void ProcessInput(GLFWwindow* window)
 	// set orthographic projection
 	else if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
 	{
-		if (!useOrthographicProjection)
+		if (gActiveScene)
 		{
-			useOrthographicProjection = true;
-			int width, height;
-			glfwGetWindowSize(window, &width, &height);
-			framebuffer_size_changed_callback(window, width, height);
+			auto camera = gActiveScene->GetCamera();
+			if (!camera->IsOrthographic())
+			{
+				camera->SetOrtho(camera->GetViewWidth(), camera->GetViewHeight(),
+					camera->GetNearClip(), camera->GetFarClip());
+			}
 		}
 	}
 	// set perspective projection
 	else if (glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS)
 	{
-		if (useOrthographicProjection)
+		if (gActiveScene)
 		{
-			useOrthographicProjection = false;
-			int width, height;
-			glfwGetWindowSize(window, &width, &height);
-			framebuffer_size_changed_callback(window, width, height);
+			auto camera = gActiveScene->GetCamera();
+			if (camera->IsOrthographic())
+			{
+				camera->SetPerspective(camera->GetViewWidth(), camera->GetViewHeight(), camera->GetFovDegrees(),
+					camera->GetNearClip(), camera->GetFarClip());
+			}
 		}
 	}
 
@@ -365,21 +429,28 @@ void ProcessInput(GLFWwindow* window)
 	{
 		movement.y = 1.0f;
 	}
-	mainCamera.ProcessMovementInput(movement, deltaTime);
+
+	if (gActiveScene)
+	{
+		auto camera = gActiveScene->GetCamera();
+		camera->ProcessMovementInput(movement, deltaTime);
+	}	
 
 	// FoV
 	if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
 	{
-		fovDegrees -= fovScrollSpeed * deltaTime;
-		int width, height;
-		glfwGetWindowSize(window, &width, &height);
-		framebuffer_size_changed_callback(window, width, height);
+		if (gActiveScene)
+		{
+			auto camera = gActiveScene->GetCamera();
+			camera->SetFovDegrees(camera->GetFovDegrees() - fovScrollSpeed * deltaTime);
+		}
 	}
 	else if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
 	{
-		fovDegrees += fovScrollSpeed * deltaTime;
-		int width, height;
-		glfwGetWindowSize(window, &width, &height);
-		framebuffer_size_changed_callback(window, width, height);
+		if (gActiveScene)
+		{
+			auto camera = gActiveScene->GetCamera();
+			camera->SetFovDegrees(camera->GetFovDegrees() + fovScrollSpeed * deltaTime);
+		}
 	}
 }

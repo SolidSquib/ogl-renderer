@@ -2,5 +2,5 @@
 
 class IRenderable
 {
-	virtual void Render(class Shader& shader) = 0;
+	virtual void Render(class Shader* shader) = 0;
 };

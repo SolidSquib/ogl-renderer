@@ -208,35 +208,35 @@ void Shader::SetMaterial(const std::string& name, const Material& material)
 void Shader::SetDirectionalLight(const std::string& name, const DirectionalLight& light, unsigned int lightIndex)
 {
 	// only support for one dir light currently
-	SetVector3(name + ".direction", light.direction);
-	SetVector3(name + ".ambient", glm::vec3(light.ambient));
-	SetVector3(name + ".diffuse", glm::vec3(light.diffuse));
-	SetVector3(name + ".specular", glm::vec3(light.specular));
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].direction", light.GetDirection());
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].ambient", glm::vec3(light.GetAmbientColor()));
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].diffuse", glm::vec3(light.GetDiffuseColor()));
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].specular", glm::vec3(light.GetSpecularColor()));
 }
 
 void Shader::SetPointLight(const std::string& name, const PointLight& light, unsigned int lightIndex)
 {
-	SetVector3(name + "[" + std::to_string(lightIndex) + "].position", light.position);
-	SetVector3(name + "[" + std::to_string(lightIndex) + "].ambient", glm::vec3(light.ambient));
-	SetVector3(name + "[" + std::to_string(lightIndex) + "].diffuse", glm::vec3(light.diffuse));
-	SetVector3(name + "[" + std::to_string(lightIndex) + "].specular", glm::vec3(light.specular));
-	SetFloat(name + "[" + std::to_string(lightIndex) + "].constant", light.constant);
-	SetFloat(name + "[" + std::to_string(lightIndex) + "].linear", light.linear);
-	SetFloat(name + "[" + std::to_string(lightIndex) + "].quadratic", light.quadratic);
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].position", light.GetPosition());
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].ambient", glm::vec3(light.GetAmbientColor()));
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].diffuse", glm::vec3(light.GetDiffuseColor()));
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].specular", glm::vec3(light.GetSpecularColor()));
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].constant", light.GetConstantComponent());
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].linear", light.GetLinearComponent());
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].quadratic", light.GetQuadraticComponent());
 }
 
 void Shader::SetSpotLight(const std::string& name, const SpotLight& light, unsigned int lightIndex)
 {
-	SetVector3(name + "[" + std::to_string(lightIndex) + "].position", light.position);
-	SetVector3(name + "[" + std::to_string(lightIndex) + "].direction", light.direction);
-	SetVector3(name + "[" + std::to_string(lightIndex) + "].ambient", glm::vec3(light.ambient));
-	SetVector3(name + "[" + std::to_string(lightIndex) + "].diffuse", glm::vec3(light.diffuse));
-	SetVector3(name + "[" + std::to_string(lightIndex) + "].specular", glm::vec3(light.specular));
-	SetFloat(name + "[" + std::to_string(lightIndex) + "].constant", light.constant);
-	SetFloat(name + "[" + std::to_string(lightIndex) + "].linear", light.linear);
-	SetFloat(name + "[" + std::to_string(lightIndex) + "].quadratic", light.quadratic);
-	SetFloat(name + "[" + std::to_string(lightIndex) + "].innerCutoff", light.innerCutoff);
-	SetFloat(name + "[" + std::to_string(lightIndex) + "].outerCutoff", light.outerCutoff);
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].position", light.GetPosition());
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].direction", light.GetDirection());
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].ambient", glm::vec3(light.GetAmbientColor()));
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].diffuse", glm::vec3(light.GetDiffuseColor()));
+	SetVector3(name + "[" + std::to_string(lightIndex) + "].specular", glm::vec3(light.GetSpecularColor()));
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].constant", light.GetConstantComponent());
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].linear", light.GetLinearComponent());
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].quadratic", light.GetQuadraticComponent());
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].innerCutoff", glm::cos(light.GetInnerCutoffRadians()));
+	SetFloat(name + "[" + std::to_string(lightIndex) + "].outerCutoff", glm::cos(light.GetOuterCutoffRadians()));
 }
 
 bool Shader::GetBool(const std::string& name) const

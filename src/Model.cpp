@@ -15,58 +15,57 @@ Model::Model(const char* loadPath)
 	LoadModel(loadPath);
 }
 
-Model& Model::SetShader(std::shared_ptr<Shader> shader)
+void Model::SetShader(std::shared_ptr<Shader> shader)
 {
 	mShader = shader;
-	return *this;
 }
 
-Model& Model::SetPosition(const glm::vec3& position)
+void Model::SetPosition(const glm::vec3& position)
 {
 	mPosition = position;
-	return *this;
 }
 
-Model& Model::SetRotation(const glm::vec3& rotation)
+void Model::SetRotation(const glm::vec3& rotation)
 {
 	mRotation = rotation;
-	return *this;
 }
 
-Model& Model::SetScale(const glm::vec3& scale)
+void Model::SetScale(const glm::vec3& scale)
 {
 	mScale = scale;
-	return *this;
 }
 
-Model& Model::SetTransform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
+void Model::SetTransform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 {
 	mPosition = position;
 	mRotation = rotation;
 	mScale = scale;
-	return *this;
 }
 
-void Model::Render(Shader& shader)
+void Model::Render(Shader* shader)
 {
-	Shader& useShader = mShader ? *mShader : shader;
-	useShader.Use();
-	for (auto& mesh : mMeshes)
+	Shader* useShader = shader ? shader : mShader.get();
+
+	if (useShader)
 	{
-		if (mesh.get())
+		useShader->Use();
+		for (auto& mesh : mMeshes)
 		{
-			// Set transforms
-			glm::mat4 meshTransform(1.0f);
-			meshTransform = glm::translate(meshTransform, mPosition);
-			meshTransform = glm::scale(meshTransform, mScale);
-			meshTransform = glm::rotate(meshTransform, mRotation.x, glm::vec3(0.0f, 0.0f, -1.0f)); // roll
-			meshTransform = glm::rotate(meshTransform, mRotation.y, glm::vec3(1.0f, 0.0f, 0.0f));  // pitch
-			meshTransform = glm::rotate(meshTransform, mRotation.z, glm::vec3(0.0f, 1.0f, 0.0f));  // yaw
-			useShader.SetMatrix4("model", meshTransform);
+			if (mesh.get())
+			{
+				// Set transforms
+				glm::mat4 meshTransform(1.0f);
+				meshTransform = glm::translate(meshTransform, mPosition);
+				meshTransform = glm::scale(meshTransform, mScale);
+				meshTransform = glm::rotate(meshTransform, mRotation.x, glm::vec3(0.0f, 0.0f, -1.0f)); // roll
+				meshTransform = glm::rotate(meshTransform, mRotation.y, glm::vec3(1.0f, 0.0f, 0.0f));  // pitch
+				meshTransform = glm::rotate(meshTransform, mRotation.z, glm::vec3(0.0f, 1.0f, 0.0f));  // yaw
+				useShader->SetMatrix4("model", meshTransform);
 
-			mesh->Render(useShader);
+				mesh->Render(useShader);
+			}
 		}
-	}	
+	}
 }
 
 void Model::LoadModel(const std::string& path)
