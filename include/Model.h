@@ -25,6 +25,7 @@ public:
 	glm::vec3 GetPosition() const { return mPosition; }
 	glm::vec3 GetRotation() const { return mRotation; }
 	glm::vec3 GetScale() const { return mScale; }
+	bool UsesTransparency() const;
 
 	virtual void Render(Shader* shader);
 

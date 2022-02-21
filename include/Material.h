@@ -18,4 +18,5 @@ struct Material
 	glm::vec3 emissionColor;
 
 	float shininess;
+	bool usesTransparency = false;
 };

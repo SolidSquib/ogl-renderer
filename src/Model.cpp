@@ -42,6 +42,19 @@ void Model::SetTransform(const glm::vec3& position, const glm::vec3& rotation, c
 	mScale = scale;
 }
 
+bool Model::UsesTransparency() const
+{
+	for (auto& mesh : mMeshes)
+	{
+		if (mesh->GetMaterial().usesTransparency)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void Model::Render(Shader* shader)
 {
 	Shader* useShader = shader ? shader : mShader.get();

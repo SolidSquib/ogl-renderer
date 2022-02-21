@@ -17,36 +17,55 @@ void Scene::Render(Shader* shader)
 	glClearColor(mClearColor.r, mClearColor.g, mClearColor.b, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	// sort the scene 
-	std::map<float, Model*> sortedActorArray;
+	mSortedTransparentActors.clear();
+	mOpaqueMeshes.clear();
 	for (auto& actor : mSceneActors)
 	{
-		float distanceSqr = glm::length2(mSceneCamera->GetLocation() - actor->GetPosition());
-		sortedActorArray[distanceSqr] = actor;
+		if (actor->UsesTransparency())
+		{
+			float distanceSqr = glm::length2(mSceneCamera->GetLocation() - actor->GetPosition());
+			mSortedTransparentActors.emplace(distanceSqr, actor);
+		}
+		else
+		{
+			mOpaqueMeshes.push_back(actor);
+		}
 	}
 
 	Shader* lastUsedShader = nullptr;
+	
 	// render 
-	for (auto actor_iter = sortedActorArray.rbegin(); actor_iter != sortedActorArray.rend(); ++actor_iter)
+	for (auto& model : mOpaqueMeshes)
 	{
-		Shader* useShader = actor_iter->second->GetShader() ? actor_iter->second->GetShader().get() : shader;
-		if (useShader)
+		if (Shader* useShader = model->GetShader() ? model->GetShader().get() : shader)
 		{
-			/* we don't need to set certain uniforms again if we're using the same shader as the last 
-			 * draw call, so we can save a little processing. */
 			if (useShader != lastUsedShader)
 			{
-				useShader->Use();
-				useShader->SetMatrix4("view", mSceneCamera->GetViewMatrix());
-				useShader->SetMatrix4("projection", mSceneCamera->GetProjectionMatrix());
-
-				PrepareLights(useShader);
+				PrepareShader(useShader);
 				lastUsedShader = useShader;
-			}		
+			}
 
-			PrepareModel(useShader, actor_iter->second);
-			actor_iter->second->Render(actor_iter->second->GetShader() ? nullptr : shader);
-		}		
+			PrepareModel(shader, model);
+			model->Render(shader);
+		}
+	}
+
+	for (auto actor_iter = mSortedTransparentActors.rbegin(); actor_iter != mSortedTransparentActors.rend(); ++actor_iter)
+	{
+		if (Shader* useShader = actor_iter->second->GetShader() ? actor_iter->second->GetShader().get() : shader)
+		{
+			if (useShader != lastUsedShader)
+			{
+				PrepareShader(useShader);
+				lastUsedShader = useShader;
+			}
+
+			PrepareModel(shader, actor_iter->second);
+			actor_iter->second->Render(shader);
+		}
 	}
 
 	Shader::Unbind();
@@ -102,4 +121,16 @@ void Scene::PrepareLights(Shader* shader)
 void Scene::PrepareModel(Shader* shader, Model* model)
 {
 	shader->SetFloat("time", (float)glfwGetTime());
+}
+
+void Scene::PrepareShader(Shader* shader)
+{	
+	if (shader)
+	{
+		shader->Use();
+		shader->SetMatrix4("view", mSceneCamera->GetViewMatrix());
+		shader->SetMatrix4("projection", mSceneCamera->GetProjectionMatrix());
+
+		PrepareLights(shader);
+	}	
 }

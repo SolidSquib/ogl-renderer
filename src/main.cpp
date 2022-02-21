@@ -176,6 +176,7 @@ int main()
 
 	Material windowMaterial;
 	windowMaterial.textures = { windowDiffuse };
+	windowMaterial.usesTransparency = true;
 
 	// meshes
 	std::shared_ptr<Mesh> cube(new Mesh(cube_vertices, cube_indices, EVA_POSITION | EVA_NORMAL | EVA_UV));
@@ -260,6 +261,7 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_STENCIL_TEST);
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
 
 	gActiveScene = &boxScene;
 	int width, height;

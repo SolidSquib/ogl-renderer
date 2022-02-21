@@ -2,6 +2,7 @@
 
 #include "Model.h"
 #include "Camera.h"
+#include <map>
 
 class Scene : public IRenderable
 {
@@ -18,6 +19,7 @@ public:
 protected:
 	void PrepareLights(Shader* shader);
 	void PrepareModel(Shader* shader, Model* model);
+	void PrepareShader(Shader* shader);
 
 private:
 	std::vector<Model*> mSceneActors;
@@ -25,4 +27,7 @@ private:
 	std::shared_ptr<Camera> mSceneCamera;
 
 	vec4 mClearColor = glm::vec4(0.1f, 0.1f, 0.2f, 1.0f);
+
+	std::vector<Model*> mOpaqueMeshes;
+	std::multimap<float, Model*> mSortedTransparentActors;
 };

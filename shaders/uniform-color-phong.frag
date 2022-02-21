@@ -185,5 +185,5 @@ void main()
 		resultColor += CalculateSpotLight(spotLights[i], diffuseColor, specularAmount, position, normal, viewDirection);
 	}
 	
-	fragColor = resultColor + emission;
+	fragColor = diffuseColor; //resultColor + emission;
 }
