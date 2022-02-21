@@ -82,13 +82,13 @@ const std::vector<unsigned int> cube_indices = {
 
 float planeVertices[] = {
 	// positions          // texture Coords 
-	 5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+	 5.0f, -0.5f,  5.0f,  2.0f, 0.0f,	
+	-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
 	-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
-	-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
 
-	 5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-	-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
-	 5.0f, -0.5f, -5.0f,  2.0f, 2.0f
+	 5.0f, -0.5f,  5.0f,  2.0f, 0.0f,	
+	 5.0f, -0.5f, -5.0f,  2.0f, 2.0f,
+	 -5.0f, -0.5f, -5.0f,  0.0f, 2.0f
 };
 
 float transparentVertices[] = {
