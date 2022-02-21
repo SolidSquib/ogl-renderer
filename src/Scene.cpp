@@ -14,7 +14,7 @@ Scene::~Scene()
 
 void Scene::Render(Shader* shader)
 {
-	glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
+	glClearColor(mClearColor.r, mClearColor.g, mClearColor.b, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	// sort the scene 
@@ -41,7 +41,6 @@ void Scene::Render(Shader* shader)
 				useShader->SetMatrix4("projection", mSceneCamera->GetProjectionMatrix());
 
 				PrepareLights(useShader);
-
 				lastUsedShader = useShader;
 			}		
 
