@@ -22,6 +22,7 @@
 		018A85C427C11CC1006B113C /* libassimpd.5.2.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 018A85C327C11CC1006B113C /* libassimpd.5.2.0.dylib */; };
 		018A85DA27C12149006B113C /* shaders in Copy Files */ = {isa = PBXBuildFile; fileRef = 018A85D927C12149006B113C /* shaders */; };
 		018A85DC27C12166006B113C /* content in Copy Files */ = {isa = PBXBuildFile; fileRef = 018A85DB27C12166006B113C /* content */; };
+		018A85DE27C28DA2006B113C /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 018A85DD27C28DA2006B113C /* Scene.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -488,6 +489,8 @@
 		018A85C327C11CC1006B113C /* libassimpd.5.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libassimpd.5.2.0.dylib; path = ../../../../usr/local/lib/libassimpd.5.2.0.dylib; sourceTree = "<group>"; };
 		018A85D927C12149006B113C /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = shaders; sourceTree = "<group>"; };
 		018A85DB27C12166006B113C /* content */ = {isa = PBXFileReference; lastKnownFileType = folder; path = content; sourceTree = "<group>"; };
+		018A85DD27C28DA2006B113C /* Scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Scene.cpp; sourceTree = "<group>"; };
+		018A85DF27C28DBC006B113C /* Scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scene.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -527,6 +530,7 @@
 		018A822427C10EB2006B113C /* src */ = {
 			isa = PBXGroup;
 			children = (
+				018A85DD27C28DA2006B113C /* Scene.cpp */,
 				018A85B727C1170A006B113C /* managers */,
 				018A83FA27C11471006B113C /* Model.cpp */,
 				018A83F827C11460006B113C /* main.cpp */,
@@ -551,6 +555,7 @@
 		018A83FC27C116BD006B113C /* include */ = {
 			isa = PBXGroup;
 			children = (
+				018A85DF27C28DBC006B113C /* Scene.h */,
 				018A83FD27C116BD006B113C /* Shader.h */,
 				018A83FE27C116BD006B113C /* Light.h */,
 				018A83FF27C116BD006B113C /* Camera.h */,
@@ -1149,6 +1154,7 @@
 				018A83F627C10EB3006B113C /* stb_image.cpp in Sources */,
 				018A83F327C10EB3006B113C /* Shader.cpp in Sources */,
 				018A83F027C10EB3006B113C /* Mesh.cpp in Sources */,
+				018A85DE27C28DA2006B113C /* Scene.cpp in Sources */,
 				018A83F927C11460006B113C /* main.cpp in Sources */,
 				018A85B627C116BD006B113C /* glm.cpp in Sources */,
 				018A83F527C10EB3006B113C /* glad.c in Sources */,

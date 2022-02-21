@@ -85,7 +85,7 @@ void Mesh::Render(Shader* shader)
 		}
 		else
 		{
-			glDrawArrays(GL_TRIANGLES, 0, mVertices.size());
+			glDrawArrays(GL_TRIANGLES, 0, (int)mVertices.size());
 		}
 		glBindVertexArray(0);
 	}
@@ -142,22 +142,26 @@ std::vector<Vertex> Mesh::ProcessFloatArray(const float* vertices, unsigned int 
 
 		if ((vertexAttributes & EVA_POSITION) == EVA_POSITION)
 		{
-			vert.pos = glm::vec3(vertices[currentIndex++], vertices[currentIndex++], vertices[currentIndex++]);
+			vert.pos = glm::vec3(vertices[currentIndex], vertices[currentIndex+1], vertices[currentIndex+2]);
+            currentIndex += 3;
 		}
 
 		if ((vertexAttributes & EVA_COLOR) == EVA_COLOR)
 		{
-			vert.col = glm::vec3(vertices[currentIndex++], vertices[currentIndex++], vertices[currentIndex++]);
+			vert.col = glm::vec3(vertices[currentIndex], vertices[currentIndex+1], vertices[currentIndex+2]);
+            currentIndex += 3;
 		}
 
 		if ((vertexAttributes & EVA_NORMAL) == EVA_NORMAL)
 		{
-			vert.norm = glm::vec3(vertices[currentIndex++], vertices[currentIndex++], vertices[currentIndex++]);
+			vert.norm = glm::vec3(vertices[currentIndex], vertices[currentIndex+1], vertices[currentIndex+2]);
+            currentIndex += 3;
 		}
 
 		if ((vertexAttributes & EVA_UV) == EVA_UV)
 		{
-			vert.uv = glm::vec2(vertices[currentIndex++], vertices[currentIndex++]);
+			vert.uv = glm::vec2(vertices[currentIndex], vertices[currentIndex+1]);
+            currentIndex += 2;
 		}
 
 		processedVerts.push_back(vert);
